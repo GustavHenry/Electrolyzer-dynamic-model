@@ -67,7 +67,10 @@ class ThermalModelData(Loader):
                 )
             )
             raw_data_list.append(df_cur)
-        df_raw_data = pd.concat(raw_data_list)
+        df_raw_data = pd.concat(
+            raw_data_list,
+            ignore_index=True
+        )
         return df_raw_data
 
 
