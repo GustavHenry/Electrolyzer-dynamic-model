@@ -4,7 +4,10 @@ REPORTS_DIR = "../reports"
 NOTEBOOKS_DIR = "../notebooks"
 
 
-ENCODING = "utf-8-sig"
+ENCODING = "utf-8-sig" # csv的编码
+COMPRESSION = "gzip" # pickle的压缩格式
+
+
 
 
 class DataDir:
@@ -23,6 +26,18 @@ class Files:
     """一些常用的，不会改变的数据文件"""
 
     history_ambient_temperature = "../data/raw/History_temperature_202001_202210.csv"
+
+
+class LoaderType:
+    """loader 中不同的文件格式，主要会对读取文件产生区别"""
+    dataframe = 'dataframe'
+    other = 'other'
+
+
+class Cache:
+    """储存一些文件的中间缓存，用于统一缓存的读取与识别"""
+    thermal_model_data_1101 = 'thermal_model_data_1101' # 重写刚开始时，简单讲所有数据拼接在一起
+
 
 
 class Constants:

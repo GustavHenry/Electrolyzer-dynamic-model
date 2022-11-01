@@ -39,6 +39,16 @@ def differential_temperature_raw_data(df):
     df[Cols.delta_temp] = diff_temp
     return df
 
+def trim_abnormal_raw_data(df):
+    """因为数据中可能存在没有记录上结果，可能会导致数据最有有-9999的部分，所以这里需要进行截断"""
+    if min(df[Cols.stack_voltage]) <0:
+        for idx in range(len(df)):
+            if df.iloc[idx][Cols.stack_voltage]<0:
+                df = df.iloc[:idx]
+                return df
+    else:
+        return df
+
 def cell_voltage_current_density(df):
     """计算小室电压与电流密度，以方便未来计算"""
     df[Cols.cell_voltage] = df[Cols.stack_voltage] / Constants.num_cells
