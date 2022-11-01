@@ -1,19 +1,60 @@
 CACHE_DIR = "../.cache"
 MODELS_DIR = "../models"
-REPORTS_DIR = '../reports'
+REPORTS_DIR = "../reports"
 NOTEBOOKS_DIR = "../notebooks"
 
 
-DATA_RAW_DIR = "../data/raw"
-DATA_INT_DIR = "../data/interim"
-DATA_PRC_DIC = "../data/processed"
+ENCODING = "utf-8-sig"
 
-DATA_RAW_INFRARED_DIR = "../data/raw/InfraredImages"
-DATA_RAW_DIR_ELECTROLYZER = "../data/raw/Electrolyzer"
 
 class DataDir:
+    """一些常用的数据路径"""
+
     Raw = "../data/raw"
     Int = "../data/interim"
     Prc = "../data/processed"
     Raw_infrared = "../data/raw/InfraredImages"
     Raw_electrolyzer = "../data/raw/Electrolyzer"
+    Raw_thermal_model = "../data/raw/ThermalModel"
+    Int_thermal_model = "../data/interim/ThermalModel"
+
+
+class Files:
+    """一些常用的，不会改变的数据文件"""
+
+    history_ambient_temperature = "../data/raw/History_temperature_202001_202210.csv"
+
+
+class Constants:
+    seconds_in_day = 24 * 3600  # 每日中的秒数
+    num_cells = 34 # 电解槽片数
+    active_area = 0.425 # 电解槽活性面积
+
+
+class Cols:
+    """数据中会用到的列名"""
+
+    time = "time"
+    date = "date"
+    date_time = "date_time"
+    stack_voltage = "stack_voltage"  # 电解槽电压
+    stack_current = "stack_current"  # 电解槽电流
+    lye_flow = "lye_flow"  # 电解槽碱液流量
+    lye_temp = "temp_in"  # 电解槽碱液入口温度
+    sys_pressure = "sys_pressure"  # 电解槽工作压力
+    o_temp = "temp_o"  # 电解槽出口氧侧温度
+    h_temp = "temp_h"  # 电解槽出口氢侧温度
+    temp_out = "temp_out"  # 电解槽出口氢氧温度平均
+    o_in_h = "OTH"  # 氢中氧含量
+    h_in_o = "HTO"  # 氧中氢含量
+    delta_temp = "delta_temp"  # 当前时刻温度与上一时刻温度差
+    current_density = "current_density"  # 电解槽工作的电流密度，电解槽面积为0.425平方米
+    cell_voltage = "cell_voltage"  # 电解槽的小室电压，电解槽有34片
+    ambt_temp = "ambt_temp"  # 环境温度需要使用时间和历史数据进行计算
+
+
+class TimeForms:
+    # pandas.datetime .strftime()中的格式
+    date = "%Y-%m-%d"  # 2021-09-24
+    time = "%H:%M:%S"  # 09:20:20
+    date_time = "%Y-%m-%d %H:%M:%S"  # 2021-09-24 09:20:20
