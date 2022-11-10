@@ -38,6 +38,7 @@ class ThermalModelData(Loader):
             )
             df = rename_excel_raw_data_from_electrolyzer(df)
             df = trim_abnormal_raw_data(df)
+            df = fillin_absent_data(df)
             df = differential_temperature_raw_data(df)
             df = cell_voltage_current_density(df)
             df = convert_df_time_raw_data(df)

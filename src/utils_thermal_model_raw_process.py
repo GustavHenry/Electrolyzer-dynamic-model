@@ -30,6 +30,16 @@ def rename_excel_raw_data_from_electrolyzer(excel):
     return df_rename
 
 
+    
+def fillin_absent_data(df):
+    """因为有的数据可能会出现中间有空的一行，什么数据都没有，所以需要进行插值"""
+    if min(df[Cols.o_temp])<=0:
+        for idx in range(len(df)):
+            if df.iloc[idx][Cols.o_temp] <= 0:
+                for col_idx in range(1,len(df.columns)):
+                    df.iat[idx,col_idx] = (df.iloc[idx-1,col_idx] + df.iloc[idx+1,col_idx])/2
+    return df
+
 def differential_temperature_raw_data(df):
     """这里针对的是计算温度的差分，方法是用当前时刻的温度减去上一时刻的温度"""
     df[Cols.temp_out] = (df[Cols.o_temp] + df[Cols.h_temp]) / 2
