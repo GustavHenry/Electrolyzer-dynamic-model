@@ -1,6 +1,7 @@
 CACHE_DIR = "../.cache"
 MODELS_DIR = "../models"
 REPORTS_DIR = "../reports"
+FIGURES_DIR = "../figures"
 NOTEBOOKS_DIR = "../notebooks"
 
 
@@ -26,6 +27,7 @@ class Files:
     """一些常用的，不会改变的数据文件"""
 
     history_ambient_temperature = "../data/raw/History_temperature_202001_202210.csv"
+    aquarel_theme_scientific = '../configs/aquarel_theme_scientific.json'
 
 
 class LoaderType:
@@ -66,6 +68,7 @@ class Cols:
     current_density = "current_density"  # 电解槽工作的电流密度，电解槽面积为0.425平方米
     cell_voltage = "cell_voltage"  # 电解槽的小室电压，电解槽有34片
     ambt_temp = "ambt_temp"  # 环境温度需要使用时间和历史数据进行计算
+    voltage_thermal_neutral = 'voltage_thermal_neutral' # 根据出口温度计算的热中性电压
 
 
 class TimeForms:

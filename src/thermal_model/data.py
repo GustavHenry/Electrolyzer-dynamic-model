@@ -15,6 +15,10 @@ class ThermalModelData(Loader):
         fp_cache = Cache.thermal_model_data_1101
     ) -> None:
         super().__init__(fp_cache)
+        if not os.path.exists(DataDir.Int_thermal_model):
+            os.makedirs(
+                DataDir.Int_thermal_model,
+            )
 
     @staticmethod
     def read_convert_raw_data_from_excel():
@@ -36,26 +40,27 @@ class ThermalModelData(Loader):
                     file
                 )
             )
-            df = rename_excel_raw_data_from_electrolyzer(df)
-            df = trim_abnormal_raw_data(df)
-            df = fillin_absent_data(df)
-            df = differential_temperature_raw_data(df)
-            df = cell_voltage_current_density(df)
-            df = convert_df_time_raw_data(df)
+            df = rename_excel_raw_data_from_electrolyzer(df) # 对原始的列名进行重命名
+            df = trim_abnormal_raw_data(df) # 删除存在-9999的异常数值
+            df = fillin_absent_data(df) # 如果原始数据存在缺失，则进行填补
+            df = differential_temperature_raw_data(df) # 对温度进行小波变换，并且进行差分处理
+            df = cell_voltage_current_density(df) # 计算电流密度与小室电压
+            df = voltage_thermal_neutral(df) # 根据出口温度计算热中性电压，可以用来计算发热，热中性电压高于测量值的时候，还得看一下怎么处理
+            df = convert_df_time_raw_data(df) # 对原始数据中的中文时间进行转换
             df = fill_history_ambt_temperature(
                 df,
                 history_ambt_temp
-            )
+            ) # 给历史数据中添加环境温度
             df.to_csv(
                 os.path.join(
-                    DataDir.Raw_thermal_model,
+                    DataDir.Int_thermal_model,
                     file
                 ),
                 encoding=ENCODING
             )
     
     def concat_all_raw_data(self):
-        source_folder = DataDir.Raw_thermal_model
+        source_folder = DataDir.Int_thermal_model
         if len(os.listdir(source_folder))<1:
             ThermalModelData.read_convert_raw_data_from_excel()
         raw_data_list = []

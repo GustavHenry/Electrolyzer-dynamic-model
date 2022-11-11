@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 from keys import Cols, Constants,TimeForms
 import math
+from utils_smooth import *
 
 
 def rename_excel_raw_data_from_electrolyzer(excel):
@@ -43,6 +44,12 @@ def fillin_absent_data(df):
 def differential_temperature_raw_data(df):
     """这里针对的是计算温度的差分，方法是用当前时刻的温度减去上一时刻的温度"""
     df[Cols.temp_out] = (df[Cols.o_temp] + df[Cols.h_temp]) / 2
+    df[Cols.temp_out] = (
+        WL(
+            df[Cols.temp_out],
+            0.25
+        )
+    )
     diff_temp = [0]
     for idx in range(1, len(df)):
         diff_temp.append(df.iloc[idx][Cols.temp_out] - df.iloc[idx - 1][Cols.temp_out])
@@ -122,4 +129,24 @@ def fill_history_ambt_temperature(df, history_ambt_temp):
         return ambt_temp
 
     df[Cols.ambt_temp] = df.apply(lambda row: fill_ambt(row, history_ambt_temp), axis=1)
+    return df
+
+
+def voltage_thermal_neutral(df):
+    """计算热中性电压
+
+    Args:
+        df (pd.dataframe): 输入内容
+    """
+    T_ref = 25
+    F = 96485
+    n = 2
+    CH2O = 75   #参考点状态下的水热容(单位：J/(K*mol))
+    CH2  = 29
+    CO2 = 29
+
+    DHH2O =-2.86*10**5 + CH2O * (df[Cols.temp_out] - T_ref)    #参考点状态下的焓变(单位：J/mol)
+    DHH2 = 0  + CH2 * (df[Cols.temp_out] - T_ref) #参考点状态下的焓变(单位：J/mol)
+    DHO2 = 0  + CO2 * (df[Cols.temp_out] - T_ref)  #参考点状态下的焓变(单位：J/mol)
+    df[Cols.voltage_thermal_neutral] = (DHH2 + DHO2/2 - DHH2O)/(n*F)
     return df
