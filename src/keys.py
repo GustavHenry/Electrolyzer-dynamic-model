@@ -46,6 +46,7 @@ class Constants:
     seconds_in_day = 24 * 3600  # 每日中的秒数
     num_cells = 34 # 电解槽片数
     active_area = 0.425 # 电解槽活性面积
+    absolute_temp_delta = 273.15 # 绝对零度到零摄氏度的差值
 
 
 class Cols:
@@ -61,14 +62,21 @@ class Cols:
     sys_pressure = "sys_pressure"  # 电解槽工作压力
     o_temp = "temp_o"  # 电解槽出口氧侧温度
     h_temp = "temp_h"  # 电解槽出口氢侧温度
-    temp_out = "temp_out"  # 电解槽出口氢氧温度平均
+
     o_in_h = "OTH"  # 氢中氧含量
     h_in_o = "HTO"  # 氧中氢含量
+
+    temp_out = "temp_out"  # 电解槽出口氢氧温度平均
     delta_temp = "delta_temp"  # 当前时刻温度与上一时刻温度差
     current_density = "current_density"  # 电解槽工作的电流密度，电解槽面积为0.425平方米
     cell_voltage = "cell_voltage"  # 电解槽的小室电压，电解槽有34片
     ambt_temp = "ambt_temp"  # 环境温度需要使用时间和历史数据进行计算
     voltage_thermal_neutral = 'voltage_thermal_neutral' # 根据出口温度计算的热中性电压
+
+    electric_heat = 'electric_heat' # 计算出的瞬时发热功率，单位应该是kW
+    radiation_dissipation = 'radiation_dissipation' # 计算出的瞬时辐射散热功率，但并不是带量纲的结果
+    input_lye_heat = 'input_lye_heat' # 进入流量乘以入口温度
+    output_lye_heat = 'output_lye_heat' # 出口流量乘以出口温度
 
 
 class TimeForms:
