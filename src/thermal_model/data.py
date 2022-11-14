@@ -85,3 +85,30 @@ class ThermalModelData(Loader):
 
         return df_raw_data
         
+def generate_model_input(df):
+    """在已有的数据基础上，生成线性模型所需的输入列"""
+    df[Cols.electric_heat] = np.maximum(
+        0,
+        (
+            df[Cols.stack_voltage] - df[Cols.voltage_thermal_neutral] * Constants.num_cells
+        ) * df[Cols.stack_current] / 1000
+    ) # 生成电热，如果采集到的电压信号低于理论热中性电压，则取零
+
+    df[Cols.radiation_dissipation] = ((
+            df[Cols.temp_out] + Constants.absolute_temp_delta
+        ) ** 4 / 2 + (
+            df[Cols.lye_temp] + Constants.absolute_temp_delta
+        ) **4 / 2 - (
+            df[Cols.ambt_temp] + Constants.absolute_temp_delta
+        ) ** 4
+    ) # 生成辐射散热，将出入口温度做平均考虑
+
+    df[Cols.input_lye_heat] = (
+        df[Cols.lye_flow] * df[Cols.lye_temp]
+    ) # 跟随碱液带入的热量
+
+    df[Cols.output_lye_heat] = (
+        df[Cols.lye_flow] * df[Cols.temp_out]
+    )
+    
+    return df
