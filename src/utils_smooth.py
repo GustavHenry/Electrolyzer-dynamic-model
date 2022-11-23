@@ -47,7 +47,7 @@ def WL(data_input, threshold=0.3):  # 小波分解
     return data_output
 
 
-"""一些别的函数"""
+"""一些别的函数，已经不再使用"""
 
 
 def diff(input):

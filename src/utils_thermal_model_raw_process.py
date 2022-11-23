@@ -6,7 +6,7 @@
 
 import pandas as pd
 import numpy as np
-from keys import Cols, Constants,TimeForms
+from keys import Cols, Constants, TimeForms
 import math
 from utils_smooth import *
 
@@ -31,40 +31,39 @@ def rename_excel_raw_data_from_electrolyzer(excel):
     return df_rename
 
 
-    
 def fillin_absent_data(df):
     """因为有的数据可能会出现中间有空的一行，什么数据都没有，所以需要进行插值"""
-    if min(df[Cols.o_temp])<=0:
+    if min(df[Cols.o_temp]) <= 0:
         for idx in range(len(df)):
             if df.iloc[idx][Cols.o_temp] <= 0:
-                for col_idx in range(1,len(df.columns)):
-                    df.iat[idx,col_idx] = (df.iloc[idx-1,col_idx] + df.iloc[idx+1,col_idx])/2
+                for col_idx in range(1, len(df.columns)):
+                    df.iat[idx, col_idx] = (
+                        df.iloc[idx - 1, col_idx] + df.iloc[idx + 1, col_idx]
+                    ) / 2
     return df
+
 
 def differential_temperature_raw_data(df):
     """这里针对的是计算温度的差分，方法是用当前时刻的温度减去上一时刻的温度"""
     df[Cols.temp_out] = (df[Cols.o_temp] + df[Cols.h_temp]) / 2
-    df[Cols.temp_out] = (
-        WL(
-            df[Cols.temp_out],
-            0.25
-        )
-    )
+    df[Cols.temp_out] = WL(df[Cols.temp_out], 0.25)
     diff_temp = [0]
     for idx in range(1, len(df)):
         diff_temp.append(df.iloc[idx][Cols.temp_out] - df.iloc[idx - 1][Cols.temp_out])
     df[Cols.delta_temp] = diff_temp
     return df
 
+
 def trim_abnormal_raw_data(df):
     """因为数据中可能存在没有记录上结果，可能会导致数据最有有-9999的部分，所以这里需要进行截断"""
-    if min(df[Cols.stack_voltage]) <0:
+    if min(df[Cols.stack_voltage]) < 0:
         for idx in range(len(df)):
-            if df.iloc[idx][Cols.stack_voltage]<0:
+            if df.iloc[idx][Cols.stack_voltage] < 0:
                 df = df.iloc[:idx]
                 return df
     else:
         return df
+
 
 def cell_voltage_current_density(df):
     """计算小室电压与电流密度，以方便未来计算"""
@@ -141,12 +140,52 @@ def voltage_thermal_neutral(df):
     T_ref = 25
     F = 96485
     n = 2
-    CH2O = 75   #参考点状态下的水热容(单位：J/(K*mol))
-    CH2  = 29
+    CH2O = 75  # 参考点状态下的水热容(单位：J/(K*mol))
+    CH2 = 29
     CO2 = 29
 
-    DHH2O =-2.86*10**5 + CH2O * (df[Cols.temp_out] - T_ref)    #参考点状态下的焓变(单位：J/mol)
-    DHH2 = 0  + CH2 * (df[Cols.temp_out] - T_ref) #参考点状态下的焓变(单位：J/mol)
-    DHO2 = 0  + CO2 * (df[Cols.temp_out] - T_ref)  #参考点状态下的焓变(单位：J/mol)
-    df[Cols.voltage_thermal_neutral] = (DHH2 + DHO2/2 - DHH2O)/(n*F)
+    DHH2O = -2.86 * 10**5 + CH2O * (df[Cols.temp_out] - T_ref)  # 参考点状态下的焓变(单位：J/mol)
+    DHH2 = 0 + CH2 * (df[Cols.temp_out] - T_ref)  # 参考点状态下的焓变(单位：J/mol)
+    DHO2 = 0 + CO2 * (df[Cols.temp_out] - T_ref)  # 参考点状态下的焓变(单位：J/mol)
+    df[Cols.voltage_thermal_neutral] = (DHH2 + DHO2 / 2 - DHH2O) / (n * F)
     return df
+
+
+class LyeTemperatureCurve:
+    """用于生成开机与关机过程中的碱液温度的类"""
+
+    def lye_heat_up(
+        start_up_time=9900,
+        start_up_temperature=62,
+        ambient_temperature=16,
+        k=0.03,
+        interval=20,
+    ):
+        """这里根据各项设定，自动生成一条开机过程中的建业温度变化曲线
+
+        Args:
+            start_up_time (int, optional): 开机使用的总时长，单位为秒. Defaults to 9900.
+            start_up_temperature (int, optional): 开机设定的出口温度阈值，应当比真实设定温度略高. Defaults to 62.
+            ambient_temperature (int, optional): 开机时的环境温度，开始暖机过程后就不再考虑. Defaults to 16.
+            k (float, optional): 调节变化过程速率的系数，默认为0.03. Defaults to 0.03.
+            interval (int, optional): 模型的计算时间间隔，正常应为20s
+        """
+        height = ambient_temperature - start_up_temperature
+        x0 = start_up_time / 3 // interval
+        time_line = np.arange(start_up_time)
+        lye_curve = height / (1 + np.exp(-k * (time_line - x0))) + ambient_temperature
+        return lye_curve
+
+    def lye_cool_down(
+        cool_down_time=22000,
+        ambient_temperature=21,
+        initial_temperature=60,
+        x0=60,
+        k=0.007,
+    ):
+        time_line = np.arange(cool_down_time // 20)
+        height = initial_temperature - ambient_temperature
+        lye_curve = height * np.exp(-k * (time_line - x0)) + ambient_temperature
+        for i in range(x0):
+            lye_curve[i] = initial_temperature
+        return lye_curve
