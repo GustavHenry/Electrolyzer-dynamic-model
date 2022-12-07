@@ -9,7 +9,8 @@ import numpy as np
 from keys import Cols, Constants, TimeForms
 import math
 from utils_smooth import *
-
+import warnings
+warnings.filterwarnings('ignore')
 
 def rename_excel_raw_data_from_electrolyzer(excel):
     """对于原始数据excel中的列名进行初步的修改，以符合文件的规范"""
@@ -150,6 +151,27 @@ def voltage_thermal_neutral(df):
     df[Cols.voltage_thermal_neutral] = (DHH2 + DHO2 / 2 - DHH2O) / (n * F)
     return df
 
+
+def standardize(
+    df, std_cols
+):
+    """在不修改原始数据的情况下将需要归一化的数据进行归一化并返回
+
+    Args:
+        df (pd.DataFrame): 原始数据，注意内存中的原始数据并不会被修改
+        std_cols (list[str]): 需要进行归一化的列
+
+    Returns:
+        _type_: _description_
+    """
+    df_new = df.copy()
+    for col in std_cols:
+        df_new[col] = (
+            df_new[col] - min(df_new[col])
+        ) / (
+            max(df_new[col]) - min(df_new[col])
+        )
+    return df_new
 
 class LyeTemperatureCurve:
     """用于生成开机与关机过程中的碱液温度的类"""

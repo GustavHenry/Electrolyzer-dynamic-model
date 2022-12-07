@@ -106,3 +106,87 @@ class Model_default_polarization_curve(Plotter):
 
     def plot(self):
         plt.plot(self.current_list,self.voltage_list)
+
+
+class Thermal_model_regression_scatter(Plotter):
+    def __init__(
+        self, 
+        model_target,
+        model_predict,
+        label="Thermal model", 
+        title_model="随机森林", # 也可以是线性回归
+        num_subplot=1, 
+        title_plot=True
+    ) -> None:
+        title = "使用{}进行回归分析的误差结果".format(title_model)
+        super().__init__(label, title, num_subplot, title_plot)
+        self.model_target = np.array(model_target)
+        self.model_predict = np.array(model_predict)
+    
+    def plot(self):
+        plt.scatter(
+            self.model_target,
+            self.model_predict
+        )
+        mininum = min(self.model_target)
+        maximum = max(self.model_predict)
+        plt.plot(
+            [mininum,maximum],
+            [mininum,maximum],
+            'r'
+        )
+
+class Thermal_model_regression_error_histplot(Plotter):
+    def __init__(
+        self, 
+        model_target,
+        error,
+        label="Thermal model", 
+        title_model="随机森林", # 也可以是线性回归
+        num_subplot=1, 
+        title_plot=True
+    ) -> None:
+        title = "使用{}进行回归分析的误差统计结果".format(title_model)
+        super().__init__(label, title, num_subplot, title_plot)
+        self.model_target = model_target
+        self.error = error
+    
+    def plot(self):
+        _ = plt.hist(
+            self.model_target,bins = 1000
+        )
+        _ = plt.hist(
+            self.error,bins = 1000
+        )
+        plt.legend(['regression target','regression error'])
+        plt.plot([0,0],[0,2000],'r')
+        plt.ylim([0,2000])
+        plt.xlim([-0.5,0.5])
+        
+class Thermal_model_regression_cumulative_error_plot(Plotter):
+    def __init__(
+        self, 
+        model_target,
+        model_predict,
+        label="Thermal model", 
+        title_model="随机森林", # 也可以是线性回归
+        num_subplot=1, 
+        title_plot=True
+    ) -> None:
+        title = "使用{}进行回归的结果累计误差显示".format(title_model)
+        super().__init__(label, title, num_subplot, title_plot)
+        self.model_target = model_target
+        self.model_predict = model_predict
+    
+    def plot(self):
+        plt.plot(
+            np.cumsum(
+                self.model_target
+            )
+        )
+        plt.plot(
+            np.cumsum(
+                self.model_predict
+            )
+        )
+        plt.legend(['regression target','regression prediction'])

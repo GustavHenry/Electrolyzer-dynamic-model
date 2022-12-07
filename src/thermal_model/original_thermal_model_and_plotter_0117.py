@@ -77,7 +77,7 @@ def Vres(Temp):
 
 
 def LyeHeatUP(x0=165, k=0.03, high=46, ambT=16):
-    import numpy as np
+
 
     x = np.arange(3 * x0)
     Tlye = high / (1 + np.exp(-k * (x - x0))) + ambT
@@ -85,7 +85,7 @@ def LyeHeatUP(x0=165, k=0.03, high=46, ambT=16):
 
 
 def LyeCoolDOWN(timespan=1100, x0=60, ambT=21, high=39, k=0.007):
-    import numpy as np
+
 
     x = np.arange(timespan)
     y = high * np.exp(-k * (x - x0)) + ambT
@@ -99,8 +99,6 @@ def LyeCoolDOWN(timespan=1100, x0=60, ambT=21, high=39, k=0.007):
 
 class Electrolyzer:
     """这里就是电解槽的类，所有和电解槽相关的内容都应该在这里面计算"""
-
-    import numpy as np
 
     ambT_default = 25
     current_default = 1500
