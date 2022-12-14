@@ -22,6 +22,7 @@ class Electrolyzer:
         self.default_current = 1500 # A
         self.default_lye_flow = 1.2 # m^3/h
         self.default_lye_temperature = 60   # degree C
+
         self.parameters = ElectrolyzerParameter()
         self.num_cells = self.parameters.num_cells
         self.active_surface_area = self.parameters.active_surface_area
@@ -111,24 +112,21 @@ class Electrolyzer:
     ):
         current_density = current / self.active_surface_area
         cell_voltage = (
-            Electrolyzer.voltage_reversible(temp_out=temperature)
-            + (
+            Electrolyzer.voltage_reversible(
+                temp_out=temperature
+            ) + (
                 (PolarizationLihao.r1 + PolarizationLihao.r2 * temperature)
                 * current_density
-            )
-            + (
+            ) + (
                 PolarizationLihao.s1
                 + PolarizationLihao.s2 * temperature
                 + PolarizationLihao.s3 * temperature**2
-            )
-            * math.log(
+            ) * math.log(
                 (
                     PolarizationLihao.t1
                     + PolarizationLihao.t2 / temperature
                     + PolarizationLihao.t3 / temperature**2
-                )
-                * current_density
-                + 1
+                ) * current_density + 1
             )
         )
         return cell_voltage * self.num_cells
@@ -168,7 +166,9 @@ class Electrolyzer:
         lye_temperature,
         current,
     ):
-        stack_voltage_thermal_neutral = Electrolyzer.voltage_thermal_neutral(temperature) * self.num_cells   # V
+        stack_voltage_thermal_neutral = Electrolyzer.voltage_thermal_neutral(
+            temperature
+        ) * self.num_cells   # V
         stack_voltage = self.polar_current_lh(current=current, temperature=temperature) # V
 
         electric_heat = ( stack_voltage - stack_voltage_thermal_neutral) * current / 1000   # kW
@@ -178,8 +178,7 @@ class Electrolyzer:
             ambient_temperature + Constants.absolute_temp_delta
         ) ** 4
         input_lye_heat = lye_flow * lye_temperature
-        output_lye_heat = lye_flow * lye_temperature
-        
+        output_lye_heat = lye_flow * temperature
         return self.thermal_balance_lsq(
             electric_heat=electric_heat,
             radiation_dissipation=radiation_dissipation,
@@ -201,7 +200,7 @@ class Electrolyzer:
             ambient_temperature=ambient_temperature,
             lye_flow=lye_flow,
             lye_temperature=lye_temperature,
-            current = current_density * self.active_surface_area
+            current = current_density *  self.active_surface_area
         )
 
     def dT_adiabatic_current(
@@ -282,6 +281,9 @@ class Electrolyzer:
             lye_temperature=lye_temperature,
             current = current_density * self.active_surface_area
         )
+    
+    def power(self,current,voltage):
+        return current * voltage / 1000 # kW
 
     def get_polarization(
         self,
@@ -308,7 +310,7 @@ class Electrolyzer:
             )
             voltage_list.append(voltage)
             temperature_list.append(temperature)
-            power_list.append(current * voltage)
+            power_list.append(self.power(current,voltage))
 
         return (
             current_list,
@@ -335,7 +337,7 @@ class Electrolyzer:
         figure = Model_default_polarization_curve(current_list=current_list,voltage_list=voltage_list)
         figure.save()
     
-    def pring_all_properties(self):
+    def print_all_properties(self):
         keys = self.__dict__
         for k in keys:
             print(k , ':\t', keys[k])

@@ -101,8 +101,8 @@ class Model_default_polarization_curve(Plotter):
         title_plot=True
     ) -> None:
         super().__init__(label, title, num_subplot, title_plot)
-        self.current_list = current_list,
-        self.voltage_list = voltage_list
+        self.current_list = np.squeeze(current_list)
+        self.voltage_list = np.squeeze(voltage_list)
 
     def plot(self):
         plt.plot(self.current_list,self.voltage_list)
