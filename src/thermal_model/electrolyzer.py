@@ -9,6 +9,7 @@ from plotter import Plotter
 from utils_thermal_model_raw_process import *
 from keys import *
 import math
+from thermal_model.configs import OperatingCondition
 
 
 """ CLASS DEFINITION AND FUNCTIONS """
@@ -18,10 +19,10 @@ class Electrolyzer:
     """这里就是电解槽的类，所有和电解槽相关的内容都应该在这里面计算"""
 
     def __init__(self) -> None:
-        self.default_ambient_temperature = 25   # degree C
-        self.default_current = 1500 # A
-        self.default_lye_flow = 1.2 # m^3/h
-        self.default_lye_temperature = 60   # degree C
+        self.default_ambient_temperature = OperatingCondition.Default.ambient_temperature   # degree C
+        self.default_current = OperatingCondition.Default.current # A
+        self.default_lye_flow = OperatingCondition.Default.lye_flow # m^3/h
+        self.default_lye_temperature = OperatingCondition.Default.lye_temperature   # degree C
 
         self.parameters = ElectrolyzerParameter()
         self.num_cells = self.parameters.num_cells

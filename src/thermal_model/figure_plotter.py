@@ -212,7 +212,7 @@ class Model_polarization_different_lye_temperature(Plotter):
                 power_list,
                 temperature_list
             ) = self.electrolyzer.get_polarization(
-                lye_flow=1.5,
+                lye_flow=self.electrolyzer.default_lye_flow,
                 lye_temperature=lye_temperature,
                 current_max=2000,
                 ambient_temperature=15,

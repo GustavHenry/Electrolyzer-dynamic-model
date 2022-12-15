@@ -110,3 +110,12 @@ class TimeForms:
     date = "%Y-%m-%d"  # 2021-09-24
     time = "%H:%M:%S"  # 09:20:20
     date_time = "%Y-%m-%d %H:%M:%S"  # 2021-09-24 09:20:20
+
+class PlotterOffset:
+    class Marker:
+        class Cross:
+            class Subplot4:
+                current_density = -94
+                lye_temperature = -1
+                font_size = 16
+

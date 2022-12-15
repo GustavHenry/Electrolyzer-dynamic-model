@@ -149,3 +149,23 @@ class ElectrolyzerParameter:
             self.heat_capacity_rate_lye
         )  # kJ/(m^3 K)
         self.coefficient_physical_delta_temp = self.heat_capacity_total  # kJ/K
+
+class OperatingCondition:
+    class Rated:
+        ep = ElectrolyzerParameter()
+        current = 1700
+        current_density = current / ep.active_surface_area
+        lye_temperature = 60
+        color = 'r'
+    
+    class Default:
+        ambient_temperature = 25   # degree C
+        current = 1500 # A
+        lye_flow = 1.2 # m^3/h
+        lye_temperature = 60   # degree C
+    
+    class Optimal:
+        ambient_temperature = 25   # degree C
+        current = 625 # A
+        lye_flow = 1.2 # m^3/h
+        lye_temperature = 60   # degree C

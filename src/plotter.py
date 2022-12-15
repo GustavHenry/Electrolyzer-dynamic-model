@@ -27,7 +27,7 @@ class Plotter(ABC):
             num=self.num_subplot, figsize=self.figsize[self.num_subplot], dpi=self.dpi
         )
         plt.subplots_adjust(
-            left=0.1, bottom=0.1, right=0.9, top=0.9, wspace=0.25, hspace=0.25
+            left=0.18, bottom=0.1, right=0.9, top=0.9, wspace=0.15, hspace=0.15
         )
         # NOTE: 这里是个人定制的style，如果未来要修改，应当注意修改json中的font family，以满足中文显示的需求
         theme = Theme.from_file(Files.aquarel_theme_scientific)
