@@ -226,5 +226,45 @@ class Model_polarization_different_lye_temperature(Plotter):
             )
         plt.xlabel(r'$Current\ density\ (A/m^2)$')
         plt.ylabel('Electrolyzer stack voltage (V)')
-        plt.legend()
-        plt.show()
+        plt.legend(
+            title = 'Lye inlet temperature'
+        )
+
+class Model_faraday_efficiency_different_lye_temperature(Plotter):
+    def __init__(
+        self, 
+        label="Thermal model", 
+        title="不同碱液入口温度下得电解槽法拉第效率响应曲线", 
+        num_subplot=1, 
+        title_plot=True
+    ) -> None:
+        from thermal_model.electrolyzer import Electrolyzer
+        super().__init__(label, title, num_subplot, title_plot)
+        self.electrolyzer = Electrolyzer()
+    
+    def plot(self):
+        temperature_list = range(35,107,20) # 只考虑不同出口温度下的法拉第效率
+        current_max = 2000
+
+        for temperature in temperature_list:
+            current_list = range(0,current_max,current_max//100)
+            faraday_efficiency_list = []
+            for current in current_list:
+                faraday_efficiency_cur = self.electrolyzer.faraday_efficiency_current(
+                    current=current,
+                    temperature=temperature
+                )
+                faraday_efficiency_list.append(faraday_efficiency_cur)
+            plt.plot(
+                np.array(current_list)/self.electrolyzer.active_surface_area,
+                faraday_efficiency_list,
+                label = r'${} ^\circ C$'.format(
+                    temperature
+                )
+            )
+        plt.xlabel(r'$Current\ density\ (A/m^2)$')
+        plt.ylabel('Electrolyzer stack voltage')
+        plt.legend(
+            title = 'Outlet temperature'
+        )
+

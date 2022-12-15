@@ -141,6 +141,7 @@ class Electrolyzer:
     
     def faraday_efficiency_current(self, current, temperature):
         # NOTE: 原始数据拟合的时候，认为1700A对应2500A/m2的电流密度，所以认为活性面积为0.68
+        # NOTE: 温度为出口温度
         current_density = current / 0.68      
         faraday_efficiency = (
             current_density ** 2 / (
