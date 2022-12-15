@@ -128,11 +128,11 @@ class Thermal_model_regression_scatter(Plotter):
             self.model_target,
             self.model_predict
         )
-        mininum = min(self.model_target)
+        minimum = min(self.model_target)
         maximum = max(self.model_predict)
         plt.plot(
-            [mininum,maximum],
-            [mininum,maximum],
+            [minimum,maximum],
+            [minimum,maximum],
             'r'
         )
 
@@ -190,3 +190,41 @@ class Thermal_model_regression_cumulative_error_plot(Plotter):
             )
         )
         plt.legend(['regression target','regression prediction'])
+
+class Model_polarization_different_lye_temperature(Plotter):
+    def __init__(
+        self, 
+        label="Thermal model", 
+        title="不同碱液入口温度下电解槽极化曲线", 
+        num_subplot=1, 
+        title_plot=True
+    ) -> None:
+        from thermal_model.electrolyzer import Electrolyzer
+        super().__init__(label, title, num_subplot, title_plot)
+        self.electrolyzer = Electrolyzer()
+    
+    def plot(self):
+        lye_temperature_list = range(35,95,10)
+        for lye_temperature in lye_temperature_list:
+            (
+                current_list,
+                voltage_list,
+                power_list,
+                temperature_list
+            ) = self.electrolyzer.get_polarization(
+                lye_flow=1.5,
+                lye_temperature=lye_temperature,
+                current_max=2000,
+                ambient_temperature=15,
+            )
+            plt.plot(
+                np.array(current_list) / self.electrolyzer.active_surface_area,
+                voltage_list,
+                label = r'${} ^\circ C$'.format(
+                    lye_temperature
+                )
+            )
+        plt.xlabel(r'$Current\ density\ (A/m^2)$')
+        plt.ylabel('Electrolyzer stack voltage (V)')
+        plt.legend()
+        plt.show()
