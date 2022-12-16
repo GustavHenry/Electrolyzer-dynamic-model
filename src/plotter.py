@@ -48,6 +48,7 @@ class Plotter(ABC):
         y1_title,
         y2_title,
     ):
+        plt.xlabel(x_title)
         ax1 = plt.gca()
         ax1.plot(
             x,
@@ -65,7 +66,7 @@ class Plotter(ABC):
         )
         ax2.tick_params(axis='y', colors=self.color_list[1])
         ax2.set_ylabel(y2_title)
-        plt.xlabel(x_title)
+        
         plt.grid(visible=False)
         return ax1, ax2
 
