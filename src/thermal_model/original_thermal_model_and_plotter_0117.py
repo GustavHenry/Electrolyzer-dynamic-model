@@ -473,6 +473,7 @@ import time
 
 
 def Polar_Curve_Tlye(current_max=2000):
+    # DONE
     # 不同碱液温度下电解槽的出口温度
     import matplotlib.pyplot as plt
 
@@ -511,6 +512,7 @@ def Polar_Curve_Tlye(current_max=2000):
 
 
 def current_temp_farady():
+    # DONE
     """这个函数主要是计算不同温度、电流密度下的法拉地效率"""
     plt.figure(figsize=(10, 6))
     ele = Electrolyzer()
