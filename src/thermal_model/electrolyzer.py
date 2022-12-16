@@ -284,6 +284,44 @@ class Electrolyzer:
             current = current_density * self.active_surface_area
         )
     
+    def temperature_thermal_adiabatic_current(
+        self,
+        lye_flow,
+        lye_temperature,
+        current
+    ):
+        """这里主要就是计算各种参数条件下，多少温度下会达到热平衡，也就是让最终的DeltaTemp为0"""
+        """准备采用二分法计算最后的平衡温度大概是多少"""
+        T_left = 0
+        T_right = 200
+        dT = 10
+        while abs(dT) > dT_threshold:
+            T_mid = (T_left + T_right) / 2.
+            dT = self.dT_adiabatic_current(
+                temperature=T_mid,
+                lye_flow=lye_flow,
+                lye_temperature=lye_temperature,
+                current=current
+            )
+            if dT>0:
+                T_left = T_mid
+            else:
+                T_right = T_mid
+        return T_mid
+    
+    def temperature_thermal_adiabatic_current_density(
+        self,
+        lye_flow,
+        lye_temperature,
+        current_density,
+    ):
+        return self.temperature_thermal_adiabatic_current(
+            lye_flow,
+            lye_temperature,
+            current_density * self.active_surface_area
+        )
+
+    
     def power(self,current,voltage):
         return current * voltage / 1000 # kW
 
