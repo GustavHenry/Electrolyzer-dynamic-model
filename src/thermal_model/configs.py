@@ -166,6 +166,9 @@ class OperatingCondition:
     
     class Optimal:
         ambient_temperature = 25   # degree C
+        ep = ElectrolyzerParameter()
         current = 625 # A
+        current_density = current / ep.active_surface_area
+        
         lye_flow = 1.2 # m^3/h
         lye_temperature = 60   # degree C

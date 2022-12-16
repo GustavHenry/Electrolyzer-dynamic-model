@@ -27,16 +27,48 @@ class Plotter(ABC):
             num=self.num_subplot, figsize=self.figsize[self.num_subplot], dpi=self.dpi
         )
         plt.subplots_adjust(
-            left=0.18, bottom=0.1, right=0.9, top=0.9, wspace=0.15, hspace=0.15
+            left=0.18, bottom=0.1, right=0.87, top=0.9, wspace=0.15, hspace=0.15
         )
         # NOTE: 这里是个人定制的style，如果未来要修改，应当注意修改json中的font family，以满足中文显示的需求
-        theme = Theme.from_file(Files.aquarel_theme_scientific)
-        theme.apply()
+        self.theme = Theme.from_file(Files.aquarel_theme_scientific)
+        self.theme.apply()
+        self.color_list = self.theme.params['colors']['palette']
 
     @abstractmethod
     def plot(self):
         """load and process required data from files"""
         raise NotImplementedError
+    
+    def plot_double_y_axis(
+        self,
+        x,
+        y1,
+        y2,
+        x_title,
+        y1_title,
+        y2_title,
+    ):
+        ax1 = plt.gca()
+        ax1.plot(
+            x,
+            y1,
+            color = self.color_list[0]
+        )
+        ax1.tick_params(axis='y', colors=self.color_list[0])
+        ax1.set_ylabel(y1_title)
+
+        ax2 =ax1.twinx()
+        ax2.plot(
+            x,
+            y2,
+            color = self.color_list[1]
+        )
+        ax2.tick_params(axis='y', colors=self.color_list[1])
+        ax2.set_ylabel(y2_title)
+        plt.xlabel(x_title)
+        plt.grid(visible=False)
+        return ax1, ax2
+
 
     def save(self):
         if self.title_plot:
