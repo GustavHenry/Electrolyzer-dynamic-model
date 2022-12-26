@@ -283,8 +283,16 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
     def plot_1(self):
         #不同碱液入口温度下电解槽出口温度
 
-        lye_temperature_range = range(35,95,1)
-        current_range = range(50,2050,25)
+        lye_temperature_range = range(
+            OperatingRange.Contour.Lye_temperature.left,
+            OperatingRange.Contour.Lye_temperature.right,
+            OperatingRange.Contour.Lye_temperature.step
+        )
+        current_range = range(
+            OperatingRange.Contour.Current.left,
+            OperatingRange.Contour.Current.right,
+            OperatingRange.Contour.Current.step
+        )
         ambient_temperature = OperatingCondition.Default.ambient_temperature
         lye_flow = OperatingCondition.Default.lye_flow
         temperature_matrix = np.ones(

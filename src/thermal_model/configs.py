@@ -172,3 +172,15 @@ class OperatingCondition:
         
         lye_flow = 1.2 # m^3/h
         lye_temperature = 60   # degree C
+    
+class OperatingRange:
+    class Contour:
+        # current density vs lye inlet temperature
+        class Current:
+            left = 50
+            right = 2050
+            step = 25
+        class Lye_temperature:
+            left = 35
+            right = 95
+            step = 1
