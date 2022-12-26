@@ -542,7 +542,7 @@ def current_temp_farady():
 
 
 def current_TlyeIn_TlyeOut():
-    # TODO
+    # DONE
     """这里是画不同碱液入口温度、输入电流下的碱液出口平衡温度"""
     t0 = time.time()
     ele = Electrolyzer()
