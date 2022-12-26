@@ -115,7 +115,7 @@ class PlotterOffset:
     class Marker:
         class Cross:
             class Subplot4:
-                current_density = -94
+                current_density = -85
                 lye_temperature = -1
                 font_size = 16
 
