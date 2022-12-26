@@ -328,6 +328,16 @@ class Electrolyzer:
     
     def power(self,current,voltage):
         return current * voltage / 1000 # kW
+    
+    def cooling_power_requirement(
+        self,
+        temperature,
+        lye_temperature,
+        lye_flow
+    ):
+        return (
+            temperature - lye_temperature
+        ) * lye_flow * self.heat_capacity_lye_flow
 
     def get_polarization(
         self,
