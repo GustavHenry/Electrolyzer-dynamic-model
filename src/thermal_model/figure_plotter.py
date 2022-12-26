@@ -389,11 +389,19 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
         # 额定点工况温度随的变化
 
         # lye_flow = OperatingCondition.Default.lye_flow
-        ambient_temperature_range = range(-15,41,1)
+        ambient_temperature_range = range(
+            OperatingRange.Contour.Ambient_temperature.left,
+            OperatingRange.Contour.Ambient_temperature.right,
+            OperatingRange.Contour.Ambient_temperature.step
+            )
         current = OperatingCondition.Rated.current
         lye_temperature = OperatingCondition.Rated.lye_temperature
         
-        lye_flow_range = np.arange(0.6,2.1,0.2)
+        lye_flow_range = np.arange(
+            OperatingRange.Contour.Lye_flow.left,
+            OperatingRange.Contour.Lye_flow.right,
+            OperatingRange.Contour.Lye_flow.step
+            )
         for lye_flow in lye_flow_range:
             temperature_list = []
             for ambient_temperature in ambient_temperature_range:
@@ -420,7 +428,11 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
     def plot_3(self):
         # 最优工况点随碱液流量的变化
 
-        lye_flow_range = np.arange(0.6,2.1,0.1)
+        lye_flow_range = np.arange(
+            OperatingRange.Contour.Lye_flow.left,
+            OperatingRange.Contour.Lye_flow.right,
+            OperatingRange.Contour.Lye_flow.step
+            )
         current = OperatingCondition.Optimal.current
         lye_temperature = OperatingCondition.Optimal.lye_temperature
         temperature_list = []
@@ -455,7 +467,11 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
     def plot_4(self):
         # 额定点工况温度随碱液流量的变化
 
-        lye_flow_range = np.arange(0.6,2.1,0.1)
+        lye_flow_range = np.arange(
+            OperatingRange.Contour.Lye_flow.left,
+            OperatingRange.Contour.Lye_flow.right,
+            OperatingRange.Contour.Lye_flow.step
+            )
         current = OperatingCondition.Rated.current
         lye_temperature = OperatingCondition.Rated.lye_temperature
         temperature_list = []

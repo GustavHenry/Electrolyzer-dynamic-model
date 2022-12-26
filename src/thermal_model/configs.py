@@ -184,3 +184,15 @@ class OperatingRange:
             left = 35
             right = 95
             step = 1
+        class Ambient_temperature:
+            left = -15
+            right = 40
+            step = 1
+        class Lye_flow:
+            left = 0.6
+            right = 2.1
+            step = 0.2
+
+
+            
+    
