@@ -2,7 +2,7 @@ from loader import Loader
 from plotter import *
 import seaborn as sns
 from thermal_model.configs import *
-
+from thermal_model.electrolyzer import Electrolyzer
 
 class Initial_delta_temp_histplot(Plotter):
     """主要用于展示最初读取数据并预处理完成后，分析展示原始的温度差分结果
@@ -199,7 +199,7 @@ class Model_polarization_different_lye_temperature(Plotter):
         num_subplot=1, 
         title_plot=True
     ) -> None:
-        from thermal_model.electrolyzer import Electrolyzer
+        
         super().__init__(label, title, num_subplot, title_plot)
         self.electrolyzer = Electrolyzer()
     
@@ -238,7 +238,7 @@ class Model_faraday_efficiency_different_lye_temperature(Plotter):
         num_subplot=1, 
         title_plot=True
     ) -> None:
-        from thermal_model.electrolyzer import Electrolyzer
+        
         super().__init__(label, title, num_subplot, title_plot)
         self.electrolyzer = Electrolyzer()
     
@@ -268,7 +268,7 @@ class Model_faraday_efficiency_different_lye_temperature(Plotter):
             title = 'Outlet temperature'
         )
 
-class Model_output_temperature_different_lye_temperature(Plotter):
+class Model_output_temperature_different_lye_temperature(QuadroPlotter):
     def __init__(
         self, 
         label="Thermal model", 
@@ -276,13 +276,13 @@ class Model_output_temperature_different_lye_temperature(Plotter):
         num_subplot=4, 
         title_plot=True
     ) -> None:
-        from thermal_model.electrolyzer import Electrolyzer
+        
         super().__init__(label, title, num_subplot, title_plot)
         self.electrolyzer = Electrolyzer()
     
     def plot_1(self):
         #不同碱液入口温度下电解槽出口温度
-        plt.subplot(2,2,1)
+
         lye_temperature_range = range(35,95,1)
         current_range = range(50,2050,25)
         ambient_temperature = OperatingCondition.Default.ambient_temperature
@@ -379,7 +379,7 @@ class Model_output_temperature_different_lye_temperature(Plotter):
 
     def plot_2(self):
         # 额定点工况温度随的变化
-        plt.subplot(2,2,2)
+
         # lye_flow = OperatingCondition.Default.lye_flow
         ambient_temperature_range = range(-15,41,1)
         current = OperatingCondition.Rated.current
@@ -404,11 +404,14 @@ class Model_output_temperature_different_lye_temperature(Plotter):
         plt.xlabel(r'$Ambient\ temperature (^\circ C)$')
         plt.ylabel(r'$Outlet temperature (^\circ C)$')
         # plt.ylim([85,90])
-        plt.legend(title = r'$Lye\ flow (m^3/h)$')
+        plt.legend(
+            title = r'$Lye\ flow (m^3/h)$',
+            loc = 'upper right'
+        )
 
     def plot_3(self):
         # 最优工况点随碱液流量的变化
-        plt.subplot(2,2,3)
+
         lye_flow_range = np.arange(0.6,2.1,0.1)
         current = OperatingCondition.Optimal.current
         lye_temperature = OperatingCondition.Optimal.lye_temperature
@@ -443,7 +446,7 @@ class Model_output_temperature_different_lye_temperature(Plotter):
     
     def plot_4(self):
         # 额定点工况温度随碱液流量的变化
-        plt.subplot(2,2,4)
+
         lye_flow_range = np.arange(0.6,2.1,0.1)
         current = OperatingCondition.Rated.current
         lye_temperature = OperatingCondition.Rated.lye_temperature
@@ -474,10 +477,3 @@ class Model_output_temperature_different_lye_temperature(Plotter):
         ax2.set_ylim([60,70])
         ax2.set_yticks(range(60,71))
         ax1.set_ylim([70,120])
-
-
-    def plot(self):
-        self.plot_1()
-        self.plot_2()
-        self.plot_3()
-        self.plot_4()

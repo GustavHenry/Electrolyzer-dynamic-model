@@ -90,6 +90,47 @@ class Plotter(ABC):
         plt.show()
 
 
+class QuadroPlotter(Plotter):
+    def __init__(
+        self, 
+        label="",
+        title="", 
+        num_subplot=4, 
+        title_plot=False
+    ) -> None:
+        super().__init__(label, title, num_subplot, title_plot)
+
+    @abstractmethod
+    def plot_1(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def plot_2(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def plot_3(self):
+        raise NotImplementedError
+
+
+    @abstractmethod
+    def plot_4(self):
+        raise NotImplementedError
+    
+    def plot(self):
+        plt.subplots_adjust(
+            left=0.18, bottom=0.1, right=0.87, top=0.9, wspace=0.2, hspace=0.15
+        )
+        plt.subplot(2,2,1)
+        self.plot_1()
+        plt.subplot(2,2,2)  
+        self.plot_2()
+        plt.subplot(2,2,3)
+        self.plot_3()
+        plt.subplot(2,2,4)
+        self.plot_4()
+
+
 # NOTE: 按照目前这个用法，其实可以取消这个类
 class SinglePlotter(Plotter):
     def __init__(self, label="Thermal model", title="") -> None:
