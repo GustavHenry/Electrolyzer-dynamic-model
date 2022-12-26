@@ -34,7 +34,11 @@ class Electrolyzer:
         self.coefficient_input_lye_heat = self.parameters.coefficient_input_lye_heat
         self.coefficient_output_lye_heat = self.parameters.coefficient_output_lye_heat
         self.coefficient_delta_temp = self.parameters.coefficient_delta_temp # 模型训练时的标的就是除过interval的
+        self.correction_input_lye_heat = self.parameters.correction_input_lye_heat # 用于产生模型的热容
 
+        self.heat_capacity_lye_flow = (
+            self.coefficient_input_lye_heat / self.correction_input_lye_heat
+        ) # 碱液热容
         self.interval = self.parameters.interval
 
 

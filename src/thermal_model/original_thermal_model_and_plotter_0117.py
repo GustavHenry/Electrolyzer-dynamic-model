@@ -741,7 +741,7 @@ def current_TlyeIn_cooling():
     plt.colorbar(CS)
     plt.xlabel(r"$current \ density \ (A/m^2)$")
     plt.ylabel(r"$Electrolyzer \ inlet \ temperature \ (^\circ C)$")
-    plt.clabel(CS, colors="w", fmt="%2.0f", fontsize=12, manual=True)
+    plt.clabel(CS, colors="w", fmt="%2.0f", fontsize=12, manual=False)
     print("the consumed time is", time.time() - t0)
     print(
         "the consumed time per point is",

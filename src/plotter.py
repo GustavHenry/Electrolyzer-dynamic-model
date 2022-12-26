@@ -70,6 +70,76 @@ class Plotter(ABC):
         plt.grid(visible=False)
         return ax1, ax2
 
+    def plot_contour_map_with_2_points(
+        self,
+        matrix,
+        x_range,
+        y_range,
+        value_default,
+        value_optimal,
+        xlabel = r'$Current\ density (A/m^2)$',
+        ylabel = r'$Lye\ inlet\ temperature (^\circ C)$',
+        unit = r'$^\circ C$'
+    ):
+        from thermal_model.configs import OperatingCondition
+        temperature_maximum = max(matrix.flatten())
+        temperature_minimum = min(matrix.flatten())
+        contour_levels = np.arange(
+            temperature_minimum,
+            temperature_maximum,
+            (temperature_maximum - temperature_minimum)/10
+        )
+        contour_figure = plt.contourf(
+            np.array(x_range) / self.electrolyzer.active_surface_area,
+            y_range,
+            matrix,
+            contour_levels,
+            origin = 'upper'
+        )
+        plt.clabel(contour_figure, colors="w", fmt="%2.0f", fontsize=12)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.colorbar(
+            contour_figure
+        )
+        # 画出额定功率点
+        plt.text(
+            OperatingCondition.Rated.current_density+PlotterOffset.Marker.Cross.Subplot4.current_density,
+            OperatingCondition.Rated.lye_temperature+PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
+            '+',
+            color=OperatingCondition.Rated.color,
+            fontdict={
+                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
+            }
+        )    
+        plt.text(
+            OperatingCondition.Rated.current_density-PlotterOffset.Marker.Cross.Subplot4.current_density,
+            OperatingCondition.Rated.lye_temperature-PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
+            str(np.round(value_default,1) )+ unit,
+            color=OperatingCondition.Rated.color,
+            fontdict={
+                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
+            }
+        )    
+        # 画出最优工况点
+        plt.text(
+            OperatingCondition.Optimal.current_density+PlotterOffset.Marker.Cross.Subplot4.current_density,
+            OperatingCondition.Optimal.lye_temperature+PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
+            '+',
+            color=OperatingCondition.Rated.color,
+            fontdict={
+                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
+            }
+        )    
+        plt.text(
+            OperatingCondition.Optimal.current_density-PlotterOffset.Marker.Cross.Subplot4.current_density,
+            OperatingCondition.Optimal.lye_temperature-PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
+            str(np.round(value_optimal,1) )+ unit,
+            color=OperatingCondition.Rated.color,
+            fontdict={
+                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
+            }
+        ) 
 
     def save(self):
         if self.title_plot:
@@ -119,7 +189,7 @@ class QuadroPlotter(Plotter):
     
     def plot(self):
         plt.subplots_adjust(
-            left=0.18, bottom=0.1, right=0.87, top=0.9, wspace=0.2, hspace=0.15
+            left=0.05, bottom=0.1, right=0.95, top=0.9, wspace=0.2, hspace=0.15
         )
         plt.subplot(2,2,1)
         self.plot_1()

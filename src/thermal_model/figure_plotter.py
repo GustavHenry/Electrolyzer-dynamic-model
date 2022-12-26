@@ -324,66 +324,13 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
                     current_range[i]==OperatingCondition.Optimal.current
                 ):
                     temperature_optimal = temperature_matrix[j,i]
-                    
-        temperature_maximum = max(temperature_matrix.flatten())
-        temperature_minimum = min(temperature_matrix.flatten())
-        contour_levels = np.arange(
-            temperature_minimum,
-            temperature_maximum,
-            (temperature_maximum - temperature_minimum)/10
+        self.plot_contour_map_with_2_points(
+            matrix= temperature_matrix,
+            x_range=np.array(current_range) ,
+            y_range=lye_temperature_range,
+            value_default=temperature_default,
+            value_optimal=temperature_optimal,
         )
-        contour_figure = plt.contourf(
-            np.array(current_range) / self.electrolyzer.active_surface_area,
-            lye_temperature_range,
-            temperature_matrix,
-            contour_levels,
-            origin = 'upper'
-        )
-        plt.clabel(contour_figure, colors="w", fmt="%2.0f", fontsize=12)
-        plt.xlabel(r'$Current\ density (A/m^2)$')
-        plt.ylabel(r'$Lye\ inlet\ temperature (^\circ C)$')
-        plt.colorbar(
-            contour_figure
-        )
-        # 画出额定功率点
-        plt.text(
-            OperatingCondition.Rated.current_density+PlotterOffset.Marker.Cross.Subplot4.current_density,
-            OperatingCondition.Rated.lye_temperature+PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
-            '+',
-            color=OperatingCondition.Rated.color,
-            fontdict={
-                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
-            }
-        )    
-        plt.text(
-            OperatingCondition.Rated.current_density-PlotterOffset.Marker.Cross.Subplot4.current_density,
-            OperatingCondition.Rated.lye_temperature-PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
-            str(np.round(temperature_default,1) )+ r'$^\circ C$',
-            color=OperatingCondition.Rated.color,
-            fontdict={
-                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
-            }
-        )    
-        # 画出最优工况点
-        plt.text(
-            OperatingCondition.Optimal.current_density+PlotterOffset.Marker.Cross.Subplot4.current_density,
-            OperatingCondition.Optimal.lye_temperature+PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
-            '+',
-            color=OperatingCondition.Rated.color,
-            fontdict={
-                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
-            }
-        )    
-        plt.text(
-            OperatingCondition.Optimal.current_density-PlotterOffset.Marker.Cross.Subplot4.current_density,
-            OperatingCondition.Optimal.lye_temperature-PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
-            str(np.round(temperature_optimal,1) )+ r'$^\circ C$',
-            color=OperatingCondition.Rated.color,
-            fontdict={
-                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
-            }
-        ) 
-
 
     def plot_2(self):
         # 额定点工况温度随的变化
@@ -558,65 +505,14 @@ class Model_output_input_temperature_delta(QuadroPlotter):
                     current_range[i]==OperatingCondition.Optimal.current
                 ):
                     temperature_optimal = temperature_matrix[j,i]
-                    
-        temperature_maximum = max(temperature_matrix.flatten())
-        temperature_minimum = min(temperature_matrix.flatten())
-        contour_levels = np.arange(
-            temperature_minimum,
-            temperature_maximum,
-            (temperature_maximum - temperature_minimum)/10
+        self.plot_contour_map_with_2_points(
+            matrix= temperature_matrix,
+            x_range=np.array(current_range) ,
+            y_range=lye_temperature_range,
+            value_default=temperature_default,
+            value_optimal=temperature_optimal,
         )
-        contour_figure = plt.contourf(
-            np.array(current_range) / self.electrolyzer.active_surface_area,
-            lye_temperature_range,
-            temperature_matrix,
-            contour_levels,
-            origin = 'upper'
-        )
-        plt.clabel(contour_figure, colors="w", fmt="%2.0f", fontsize=12)
-        plt.xlabel(r'$Current\ density (A/m^2)$')
-        plt.ylabel(r'$Lye\ inlet\ temperature (^\circ C)$')
-        plt.colorbar(
-            contour_figure
-        )
-        # 画出额定功率点
-        plt.text(
-            OperatingCondition.Rated.current_density+PlotterOffset.Marker.Cross.Subplot4.current_density,
-            OperatingCondition.Rated.lye_temperature+PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
-            '+',
-            color=OperatingCondition.Rated.color,
-            fontdict={
-                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
-            }
-        )    
-        plt.text(
-            OperatingCondition.Rated.current_density-PlotterOffset.Marker.Cross.Subplot4.current_density,
-            OperatingCondition.Rated.lye_temperature-PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
-            str(np.round(temperature_default,1) )+ r'$^\circ C$',
-            color=OperatingCondition.Rated.color,
-            fontdict={
-                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
-            }
-        )    
-        # 画出最优工况点
-        plt.text(
-            OperatingCondition.Optimal.current_density+PlotterOffset.Marker.Cross.Subplot4.current_density,
-            OperatingCondition.Optimal.lye_temperature+PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
-            '+',
-            color=OperatingCondition.Rated.color,
-            fontdict={
-                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
-            }
-        )    
-        plt.text(
-            OperatingCondition.Optimal.current_density-PlotterOffset.Marker.Cross.Subplot4.current_density,
-            OperatingCondition.Optimal.lye_temperature-PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
-            str(np.round(temperature_optimal,1) )+ r'$^\circ C$',
-            color=OperatingCondition.Rated.color,
-            fontdict={
-                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
-            }
-        ) 
+
     def plot_2(self):
         # 额定点工况温度随的变化
 
