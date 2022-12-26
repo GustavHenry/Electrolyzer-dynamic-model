@@ -341,7 +341,7 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
         )
         plt.clabel(contour_figure, colors="w", fmt="%2.0f", fontsize=12)
         plt.xlabel(r'$Current\ density (A/m^2)$')
-        plt.ylabel(r'$Lye inlet temperature (^\circ C)$')
+        plt.ylabel(r'$Lye\ inlet\ temperature (^\circ C)$')
         plt.colorbar(
             contour_figure
         )
@@ -418,7 +418,7 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
                 label = np.round(lye_flow,1)
             )
         plt.xlabel(r'$Ambient\ temperature (^\circ C)$')
-        plt.ylabel(r'$Outlet temperature (^\circ C)$')
+        plt.ylabel(r'$Outlet\ temperature (^\circ C)$')
         # plt.ylim([85,90])
         plt.legend(
             title = r'$Lye\ flow (m^3/h)$',
@@ -575,7 +575,7 @@ class Model_output_input_temperature_delta(QuadroPlotter):
         )
         plt.clabel(contour_figure, colors="w", fmt="%2.0f", fontsize=12)
         plt.xlabel(r'$Current\ density (A/m^2)$')
-        plt.ylabel(r'$Lye inlet temperature (^\circ C)$')
+        plt.ylabel(r'$Lye\ inlet\ temperature (^\circ C)$')
         plt.colorbar(
             contour_figure
         )
@@ -654,7 +654,7 @@ class Model_output_input_temperature_delta(QuadroPlotter):
                 label = np.round(lye_flow,1)
             )
         plt.xlabel(r'$Ambient\ temperature (^\circ C)$')
-        plt.ylabel(r'$Temperature difference (^\circ C)$')
+        plt.ylabel(r'$Temperature\ difference (^\circ C)$')
         # plt.ylim([85,90])
         plt.legend(
             title = r'$Lye\ flow (m^3/h)$',
@@ -696,7 +696,7 @@ class Model_output_input_temperature_delta(QuadroPlotter):
             y1 = temperature_delta_list,
             y2 = voltage_list,
             x_title = r'$Lye\ flow (m^3/h)$',
-            y1_title= r'$Temperature difference (^\circ C)$',
+            y1_title= r'$Temperature\ difference (^\circ C)$',
             y2_title='Stack voltage (V)',
         )
         ax2.set_ylim([60,65])
@@ -738,7 +738,7 @@ class Model_output_input_temperature_delta(QuadroPlotter):
             y1 = temperature_delta_list,
             y2 = voltage_list,
             x_title = r'$Lye\ flow (m^3/h)$',
-            y1_title= r'$Temperature difference (^\circ C)$',
+            y1_title= r'$Temperature\ difference (^\circ C)$',
             y2_title='Stack voltage (V)',
         )
         ax2.set_ylim([60,70])
