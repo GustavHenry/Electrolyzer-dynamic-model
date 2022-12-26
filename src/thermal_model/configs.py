@@ -192,7 +192,13 @@ class OperatingRange:
             left = 0.6
             right = 2.1
             step = 0.2
-
-
-            
     
+    class Cooling:
+        class Current:
+            left = 25
+            right = 2050
+            step = 50
+        class Lye_flow:
+            left = 0.6
+            right = 2.1
+            step = 0.3
