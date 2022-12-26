@@ -501,3 +501,246 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
         ax2.set_ylim([60,70])
         ax2.set_yticks(range(60,71))
         ax1.set_ylim([70,120])
+
+
+class Model_output_input_temperature_delta(QuadroPlotter):
+    def __init__(
+        self, 
+        label="Thermal model", 
+        title="不同碱液入口温度下电解槽出入口温度差", 
+        num_subplot=4, 
+        title_plot=False
+    ) -> None:
+        super().__init__(label, title, num_subplot, title_plot)
+        self.electrolyzer = Electrolyzer()
+    
+    def plot_1(self):
+        #不同碱液入口温度下电解槽出口温度
+
+        lye_temperature_range = range(
+            OperatingRange.Contour.Lye_temperature.left,
+            OperatingRange.Contour.Lye_temperature.right,
+            OperatingRange.Contour.Lye_temperature.step
+        )
+        current_range = range(
+            OperatingRange.Contour.Current.left,
+            OperatingRange.Contour.Current.right,
+            OperatingRange.Contour.Current.step
+        )
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        lye_flow = OperatingCondition.Default.lye_flow
+        temperature_matrix = np.ones(
+            (
+                len(lye_temperature_range),
+                len(current_range)
+            )
+        ) # 出口温度
+        for i in range(len(current_range)):
+            for j in range(len(lye_temperature_range)):
+                1
+                temperature_matrix[j,i] = (
+                    self.electrolyzer.temperature_thermal_balance_current(
+                        ambient_temperature=ambient_temperature,
+                        lye_flow=lye_flow,
+                        lye_temperature=lye_temperature_range[j],
+                        current = current_range[i]
+                    ) - lye_temperature_range[j]
+                )
+                if (
+                    lye_temperature_range[j] == OperatingCondition.Rated.lye_temperature
+                ) and (
+                    current_range[i]==OperatingCondition.Rated.current
+                ):
+                    temperature_default = temperature_matrix[j,i]
+                if (
+                    lye_temperature_range[j] == OperatingCondition.Optimal.lye_temperature
+                ) and (
+                    current_range[i]==OperatingCondition.Optimal.current
+                ):
+                    temperature_optimal = temperature_matrix[j,i]
+                    
+        temperature_maximum = max(temperature_matrix.flatten())
+        temperature_minimum = min(temperature_matrix.flatten())
+        contour_levels = np.arange(
+            temperature_minimum,
+            temperature_maximum,
+            (temperature_maximum - temperature_minimum)/10
+        )
+        contour_figure = plt.contourf(
+            np.array(current_range) / self.electrolyzer.active_surface_area,
+            lye_temperature_range,
+            temperature_matrix,
+            contour_levels,
+            origin = 'upper'
+        )
+        plt.clabel(contour_figure, colors="w", fmt="%2.0f", fontsize=12)
+        plt.xlabel(r'$Current\ density (A/m^2)$')
+        plt.ylabel(r'$Lye inlet temperature (^\circ C)$')
+        plt.colorbar(
+            contour_figure
+        )
+        # 画出额定功率点
+        plt.text(
+            OperatingCondition.Rated.current_density+PlotterOffset.Marker.Cross.Subplot4.current_density,
+            OperatingCondition.Rated.lye_temperature+PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
+            '+',
+            color=OperatingCondition.Rated.color,
+            fontdict={
+                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
+            }
+        )    
+        plt.text(
+            OperatingCondition.Rated.current_density-PlotterOffset.Marker.Cross.Subplot4.current_density,
+            OperatingCondition.Rated.lye_temperature-PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
+            str(np.round(temperature_default,1) )+ r'$^\circ C$',
+            color=OperatingCondition.Rated.color,
+            fontdict={
+                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
+            }
+        )    
+        # 画出最优工况点
+        plt.text(
+            OperatingCondition.Optimal.current_density+PlotterOffset.Marker.Cross.Subplot4.current_density,
+            OperatingCondition.Optimal.lye_temperature+PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
+            '+',
+            color=OperatingCondition.Rated.color,
+            fontdict={
+                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
+            }
+        )    
+        plt.text(
+            OperatingCondition.Optimal.current_density-PlotterOffset.Marker.Cross.Subplot4.current_density,
+            OperatingCondition.Optimal.lye_temperature-PlotterOffset.Marker.Cross.Subplot4.lye_temperature,
+            str(np.round(temperature_optimal,1) )+ r'$^\circ C$',
+            color=OperatingCondition.Rated.color,
+            fontdict={
+                'size':PlotterOffset.Marker.Cross.Subplot4.font_size
+            }
+        ) 
+    def plot_2(self):
+        # 额定点工况温度随的变化
+
+        # lye_flow = OperatingCondition.Default.lye_flow
+        ambient_temperature_range = range(
+            OperatingRange.Contour.Ambient_temperature.left,
+            OperatingRange.Contour.Ambient_temperature.right,
+            OperatingRange.Contour.Ambient_temperature.step
+            )
+        current = OperatingCondition.Rated.current
+        lye_temperature = OperatingCondition.Rated.lye_temperature
+        
+        lye_flow_range = np.arange(
+            OperatingRange.Contour.Lye_flow.left,
+            OperatingRange.Contour.Lye_flow.right,
+            OperatingRange.Contour.Lye_flow.step
+            )
+        for lye_flow in lye_flow_range:
+            temperature_list = []
+            temperature_delta_list = []
+            for ambient_temperature in ambient_temperature_range:
+                temperature_cur = self.electrolyzer.temperature_thermal_balance_current(
+                    ambient_temperature=ambient_temperature,
+                    lye_flow= lye_flow,
+                    lye_temperature = lye_temperature,
+                    current=current
+                )
+                temperature_list.append(temperature_cur)
+                temperature_delta_list.append(
+                    temperature_cur - lye_temperature
+                )
+            plt.plot(
+                ambient_temperature_range,
+                temperature_delta_list,
+                label = np.round(lye_flow,1)
+            )
+        plt.xlabel(r'$Ambient\ temperature (^\circ C)$')
+        plt.ylabel(r'$Temperature difference (^\circ C)$')
+        # plt.ylim([85,90])
+        plt.legend(
+            title = r'$Lye\ flow (m^3/h)$',
+            loc = 'upper right'
+        )
+
+    def plot_3(self):
+        # 最优工况点随碱液流量的变化
+
+        lye_flow_range = np.arange(
+            OperatingRange.Contour.Lye_flow.left,
+            OperatingRange.Contour.Lye_flow.right,
+            OperatingRange.Contour.Lye_flow.step
+            )
+        current = OperatingCondition.Optimal.current
+        lye_temperature = OperatingCondition.Optimal.lye_temperature
+        temperature_list = []
+        voltage_list = []
+        temperature_delta_list = []
+        for lye_flow in lye_flow_range:
+            temperature_cur = self.electrolyzer.temperature_thermal_balance_current(
+                ambient_temperature= OperatingCondition.Default.ambient_temperature,
+                lye_flow= lye_flow,
+                lye_temperature = lye_temperature,
+                current=current
+            )
+            voltage_cur = self.electrolyzer.polar_current_lh(
+                current = current,
+                temperature=temperature_cur
+            )
+            temperature_list.append(temperature_cur)
+            temperature_delta_list.append(
+                temperature_cur - lye_temperature
+            )
+            voltage_list.append(voltage_cur)
+        
+        ax1,ax2 = self.plot_double_y_axis(
+            x = lye_flow_range,
+            y1 = temperature_delta_list,
+            y2 = voltage_list,
+            x_title = r'$Lye\ flow (m^3/h)$',
+            y1_title= r'$Temperature difference (^\circ C)$',
+            y2_title='Stack voltage (V)',
+        )
+        ax2.set_ylim([60,65])
+        # ax2.set_yticks(range(66,71))
+        ax1.set_ylim([-5,10])
+
+    
+    def plot_4(self):
+        # 额定点工况温度随碱液流量的变化
+
+        lye_flow_range = np.arange(
+            OperatingRange.Contour.Lye_flow.left,
+            OperatingRange.Contour.Lye_flow.right,
+            OperatingRange.Contour.Lye_flow.step
+            )
+        current = OperatingCondition.Rated.current
+        lye_temperature = OperatingCondition.Rated.lye_temperature
+        temperature_list = []
+        voltage_list = []
+        temperature_delta_list = []
+        for lye_flow in lye_flow_range:
+            temperature_cur = self.electrolyzer.temperature_thermal_balance_current(
+                ambient_temperature= self.electrolyzer.default_ambient_temperature,
+                lye_flow= lye_flow,
+                lye_temperature = lye_temperature,
+                current=current
+            ) 
+            voltage_cur = self.electrolyzer.polar_current_lh(
+                current = current,
+                temperature=temperature_cur
+            )
+            temperature_list.append(temperature_cur)
+            voltage_list.append(voltage_cur)
+            temperature_delta_list.append(
+                temperature_cur - lye_temperature
+            )
+        ax1,ax2 = self.plot_double_y_axis(
+            x = lye_flow_range,
+            y1 = temperature_delta_list,
+            y2 = voltage_list,
+            x_title = r'$Lye\ flow (m^3/h)$',
+            y1_title= r'$Temperature difference (^\circ C)$',
+            y2_title='Stack voltage (V)',
+        )
+        ax2.set_ylim([60,70])
+        ax2.set_yticks(range(60,71))
+        ax1.set_ylim([10,60])
