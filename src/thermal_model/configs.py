@@ -163,6 +163,7 @@ class OperatingCondition:
         current = 1500 # A
         lye_flow = 1.2 # m^3/h
         lye_temperature = 60   # degree C
+        cooling_efficiency = 0.25 # 真实冷却功率与冷却功率需求
     
     class Optimal:
         ambient_temperature = 25   # degree C

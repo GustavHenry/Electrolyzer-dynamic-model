@@ -51,6 +51,12 @@ class Electrolyzer:
     @staticmethod
     def voltage_thermal_neutral(temperature):
         """计算热中性电压, 根据出口温度
+
+        Args:
+            temperature (_type_): 出口温度
+
+        Returns:
+            _type_: 小室的热中性电压
         """
         T_ref = 25
         F = 96485
@@ -68,7 +74,14 @@ class Electrolyzer:
 
     @staticmethod
     def voltage_reversible(temp_out):
-        """根据出口温度计算可逆电压，此方法针对的是单个数据，而非是data frame"""
+        """根据出口温度计算可逆电压，此方法针对的是单个数据，而非是data frame
+
+        Args:
+            temp_out (_type_): 出口温度
+
+        Returns:
+            _type_: 小室的可逆电压
+        """
         T_ref = 25
         F = 96485
         n = 2
@@ -107,6 +120,17 @@ class Electrolyzer:
         input_lye_heat,
         output_lye_heat,
     ):
+        """根据热模型，计算四个输入项得到的等式右端的温度变化量（每秒）
+
+        Args:
+            electric_heat (_type_): 电热，即电流乘电压
+            radiation_dissipation (_type_): 辐射散失，即绝对温度的四次方减去环境绝对温度的四次方
+            input_lye_heat (_type_): 输入热量，即碱液温度乘碱液流量
+            output_lye_heat (_type_): 输出热量，即出口温度乘碱液流量
+
+        Returns:
+            _type_: 温度变化，每度/每秒
+        """
         lsq_model_input = [
             electric_heat * self.coefficient_electric_heat,
             radiation_dissipation * self.coefficient_radiation_dissipation,
@@ -121,6 +145,15 @@ class Electrolyzer:
         current,
         temperature,
     ):
+        """李昊版本的极化曲线，只采用了出口温度作为指标
+
+        Args:
+            current (_type_): 输入电流，A
+            temperature (_type_): 出口温度，摄氏度
+
+        Returns:
+            _type_: 整个电解槽的极化电压
+        """
         current_density = current / self.active_surface_area
         cell_voltage = (
             Electrolyzer.voltage_reversible(
@@ -143,6 +176,15 @@ class Electrolyzer:
         return cell_voltage * self.num_cells
 
     def polar_current_density_lh(self, current_density, temperature):
+        """李昊版本的极化曲线的电流密度版本
+
+        Args:
+            current_density (_type_): 电流密度，A/m2
+            temperature (_type_): 出口温度
+
+        Returns:
+            _type_: 电解槽的电压
+        """
         return self.polar_current_lh(
             current = current_density * self.active_surface_area,
             temperature=temperature
@@ -151,6 +193,15 @@ class Electrolyzer:
 
     
     def faraday_efficiency_current(self, current, temperature):
+        """计算电解槽的法拉第效率
+
+        Args:
+            current (_type_): 电流
+            temperature (_type_): 出口温度
+
+        Returns:
+            _type_: 法拉第效率，0-1之间
+        """
         # NOTE: 原始数据拟合的时候，认为1700A对应2500A/m2的电流密度，所以认为活性面积为0.68
         # NOTE: 温度为出口温度
         current_density = current / 0.68      
@@ -178,6 +229,18 @@ class Electrolyzer:
         lye_temperature,
         current,
     ):
+        """计算当前状况下电解槽的温度变化情况，即每秒的温度变化
+
+        Args:
+            temperature (_type_): 出口温度
+            ambient_temperature (_type_): 环境温度
+            lye_flow (_type_): 碱液流量
+            lye_temperature (_type_): 碱液入口温度
+            current (_type_): 电流
+
+        Returns:
+            _type_: 电解槽出口温度变化，即每度/每秒
+        """
         stack_voltage_thermal_neutral = Electrolyzer.voltage_thermal_neutral(
             temperature
         ) * self.num_cells   # V
@@ -223,6 +286,17 @@ class Electrolyzer:
         current,
         
     ):
+        """假设对电解槽进行绝热处理后，电解槽的温度变化情况，但是由于绝热处理产生的影响较小，所以可以忽略不计
+
+        Args:
+            temperature (_type_): _description_
+            lye_flow (_type_): _description_
+            lye_temperature (_type_): _description_
+            current (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
         stack_voltage_thermal_neutral = Electrolyzer.voltage_thermal_neutral(temperature) * self.num_cells   # V
         stack_voltage = self.polar_current_lh(current=current, temperature=temperature) # V
 
@@ -384,6 +458,15 @@ class Electrolyzer:
 
     
     def power(self,current,voltage):
+        """标准计算电解槽功率的方法
+
+        Args:
+            current (_type_): 电流
+            voltage (_type_): 电解槽整体电压
+
+        Returns:
+            _type_: _description_
+        """
         return current * voltage / 1000 # kW
     
     def cooling_power_requirement(
@@ -392,6 +475,16 @@ class Electrolyzer:
         lye_temperature,
         lye_flow
     ):
+        """电解槽的冷却功率需求，乘上冷却系数就是真实的冷却功率
+
+        Args:
+            temperature (_type_): 出口温度
+            lye_temperature (_type_): 碱液温度
+            lye_flow (_type_): 碱液流量
+
+        Returns:
+            _type_: 冷却功率需求
+        """
         return (
             temperature - lye_temperature
         ) * lye_flow * self.heat_capacity_lye_flow
@@ -403,6 +496,17 @@ class Electrolyzer:
         lye_flow,
         lye_temperature,
     ):
+        """获取给定限制下的电解槽极化特征
+
+        Args:
+            current_max (_type_): 最大电流
+            ambient_temperature (_type_): 环境温度
+            lye_flow (_type_): 碱液流量
+            lye_temperature (_type_): 碱液入口温度
+
+        Returns:
+            _type_: 电流、电压、功率、出口温度数列
+        """
         current_list = range(0,current_max,current_max//100)
         voltage_list = []
         power_list = []
