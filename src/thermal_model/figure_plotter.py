@@ -778,9 +778,9 @@ class Model_cooling_power_requirement(QuadroPlotter):
             OperatingRange.Cooling.Lye_flow.step/3
         )
         ambient_temperature = OperatingCondition.Default.ambient_temperature
-
         cooling_power_list_optimal = []
         cooling_power_list_rated = []
+        
         for lye_flow in lye_flow_range:
             current = OperatingCondition.Optimal.current
             lye_temperature = OperatingCondition.Optimal.lye_temperature
