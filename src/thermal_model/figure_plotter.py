@@ -780,7 +780,7 @@ class Model_cooling_power_requirement(QuadroPlotter):
         ambient_temperature = OperatingCondition.Default.ambient_temperature
         cooling_power_list_optimal = []
         cooling_power_list_rated = []
-        
+
         for lye_flow in lye_flow_range:
             current = OperatingCondition.Optimal.current
             lye_temperature = OperatingCondition.Optimal.lye_temperature
@@ -833,4 +833,228 @@ class Model_cooling_power_requirement(QuadroPlotter):
         plt.legend(
             title = r'$Lye\ flow (m^3/h)$',
             loc = 'upper left'
+        )
+
+class Model_efficiency_hydrogen_cost(QuadroPlotter):
+    def __init__(
+        self, 
+        label="Thermal model", 
+        title="不同工况下的电解槽高热值热效率与制氢能耗", 
+        num_subplot=4, 
+        title_plot=False
+    ) -> None:
+        """里面的1、3分别留给高热值热效率，2、4留给
+
+        Args:
+            label (str, optional): _description_. Defaults to "Thermal model".
+            title (str, optional): _description_. Defaults to "不同工况下的电解槽高热值热效率与制氢能耗".
+            num_subplot (int, optional): _description_. Defaults to 4.
+            title_plot (bool, optional): _description_. Defaults to False.
+        """
+        super().__init__(label, title, num_subplot, title_plot)
+        self.electrolyzer = Electrolyzer()
+    
+    def plot_1(self):
+        lye_temperature_range = range(
+            OperatingRange.Contour.Lye_temperature.left,
+            OperatingRange.Contour.Lye_temperature.right,
+            OperatingRange.Contour.Lye_temperature.step
+        )
+        current_range = range(
+            OperatingRange.Contour.Current.left,
+            OperatingRange.Contour.Current.right,
+            OperatingRange.Contour.Current.step
+        )
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        lye_flow = OperatingCondition.Default.lye_flow
+        efficiency_matrix = np.ones(
+            (
+                len(lye_temperature_range),
+                len(current_range)
+            )
+        ) # 电解槽高热值热效率
+        for i in range(len(current_range)):
+            for j in range(len(lye_temperature_range)):
+                efficiency_matrix[j,i] = self.electrolyzer.efficiency_current(
+                    current=current_range[i],
+                    ambient_temperature=ambient_temperature,
+                    lye_flow=lye_flow,
+                    lye_temperature=lye_temperature_range[j]
+                )
+                if (
+                    lye_temperature_range[j] == OperatingCondition.Rated.lye_temperature
+                ) and (
+                    current_range[i]==OperatingCondition.Rated.current
+                ):
+                    efficiency_default = efficiency_matrix[j,i]
+                if (
+                    lye_temperature_range[j] == OperatingCondition.Optimal.lye_temperature
+                ) and (
+                    current_range[i]==OperatingCondition.Optimal.current
+                ):
+                    efficiency_optimal = efficiency_matrix[j,i]
+        self.plot_contour_map_with_2_points(
+            matrix=efficiency_matrix,
+            x_range=np.array(current_range) / self.electrolyzer.active_surface_area,
+            y_range=lye_temperature_range,
+            value_default=efficiency_default,
+            value_optimal=efficiency_optimal,
+            unit = '%',
+            value_min = 65,
+            value_max=90
+        )
+
+
+    def plot_2(self):
+        lye_temperature_range = range(
+            OperatingRange.Contour.Lye_temperature.left,
+            OperatingRange.Contour.Lye_temperature.right,
+            OperatingRange.Contour.Lye_temperature.step
+        )
+        current_range = range(
+            OperatingRange.Contour.Current.left,
+            OperatingRange.Contour.Current.right,
+            OperatingRange.Contour.Current.step
+        )
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        lye_flow = OperatingCondition.Default.lye_flow
+        cost_matrix = np.ones(
+            (
+                len(lye_temperature_range),
+                len(current_range)
+            )
+        ) # 电解槽高热值热效率
+        for i in range(len(current_range)):
+            for j in range(len(lye_temperature_range)):
+                cost_matrix[j,i] = self.electrolyzer.hydrogen_cost_current(
+                    current=current_range[i],
+                    lye_flow=lye_flow,
+                    lye_temperature=lye_temperature_range[j],
+                    ambient_temperature=ambient_temperature,
+
+                )
+
+                if (
+                    lye_temperature_range[j] == OperatingCondition.Rated.lye_temperature
+                ) and (
+                    current_range[i]==OperatingCondition.Rated.current
+                ):
+                    cost_default = cost_matrix[j,i]
+                if (
+                    lye_temperature_range[j] == OperatingCondition.Optimal.lye_temperature
+                ) and (
+                    current_range[i]==OperatingCondition.Optimal.current
+                ):
+                    cost_optimal = cost_matrix[j,i]
+        self.plot_contour_map_with_2_points(
+            matrix=cost_matrix,
+            x_range=np.array(current_range) / self.electrolyzer.active_surface_area,
+            y_range=lye_temperature_range,
+            value_default=cost_default,
+            value_optimal=cost_optimal,
+            unit = r'$kWh/Nm^3$',
+            value_max=5.8,
+            value_min=4.2
+        )
+
+    def plot_3(self):
+        # 额定工作点和最优工作点的效率情况
+        lye_flow_range = np.arange(
+            OperatingRange.Cooling.Lye_flow.left,
+            OperatingRange.Cooling.Lye_flow.right,
+            OperatingRange.Cooling.Lye_flow.step/3
+        )
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        efficiency_list_optimal = []
+        efficiency_list_rated = []
+
+        for lye_flow in lye_flow_range:
+            current = OperatingCondition.Optimal.current
+            lye_temperature = OperatingCondition.Optimal.lye_temperature
+            efficiency_cur_optimal = self.electrolyzer.efficiency_current(
+                current=current,
+                ambient_temperature=ambient_temperature,
+                lye_flow=lye_flow,
+                lye_temperature=lye_temperature
+            )
+            current = OperatingCondition.Rated.current
+            lye_temperature = OperatingCondition.Rated.lye_temperature
+            efficiency_cur_rated = self.electrolyzer.efficiency_current(
+                current=current,
+                ambient_temperature=ambient_temperature,
+                lye_flow=lye_flow,
+                lye_temperature=lye_temperature
+            )
+            efficiency_list_optimal.append(efficiency_cur_optimal)
+            efficiency_list_rated.append(efficiency_cur_rated)
+        plt.plot(
+            lye_flow_range,
+            efficiency_list_optimal,
+            label = 'Optimal condition'
+        )
+        plt.plot(
+            lye_flow_range,
+            efficiency_list_rated,
+            label = 'Rated condition'
+        )
+        plt.xlabel(
+            r'$Lye\ flow (m^3/h)$',
+        )
+        plt.ylabel(
+            'Electrolyzer efficiency (%)'
+        )
+        plt.ylim([70,85])
+        plt.legend(
+            title = 'Operating condition'
+        )
+
+    def plot_4(self):
+        # 额定工作点和最优工作点的效率情况
+        lye_flow_range = np.arange(
+            OperatingRange.Cooling.Lye_flow.left,
+            OperatingRange.Cooling.Lye_flow.right,
+            OperatingRange.Cooling.Lye_flow.step/3
+        )
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        cost_list_optimal = []
+        cost_list_rated = []
+
+        for lye_flow in lye_flow_range:
+            current = OperatingCondition.Optimal.current
+            lye_temperature = OperatingCondition.Optimal.lye_temperature
+            cost_cur_optimal = self.electrolyzer.hydrogen_cost_current(
+                current=current,
+                ambient_temperature=ambient_temperature,
+                lye_flow=lye_flow,
+                lye_temperature=lye_temperature
+            )
+            current = OperatingCondition.Rated.current
+            lye_temperature = OperatingCondition.Rated.lye_temperature
+            cost_cur_rated = self.electrolyzer.hydrogen_cost_current(
+                current=current,
+                ambient_temperature=ambient_temperature,
+                lye_flow=lye_flow,
+                lye_temperature=lye_temperature
+            )
+            cost_list_optimal.append(cost_cur_optimal)
+            cost_list_rated.append(cost_cur_rated)
+        plt.plot(
+            lye_flow_range,
+            cost_list_optimal,
+            label = 'Optimal condition'
+        )
+        plt.plot(
+            lye_flow_range,
+            cost_list_rated,
+            label = 'Rated condition'
+        )
+        plt.xlabel(
+            r'$Lye\ flow (m^3/h)$',
+        )
+        plt.ylabel(
+            r'$Hydrogen\ production\ cost\ (kWh/Nm^3)$'
+        )
+        plt.ylim([4.2,5.8])
+        plt.legend(
+            title = 'Operating condition'
         )
