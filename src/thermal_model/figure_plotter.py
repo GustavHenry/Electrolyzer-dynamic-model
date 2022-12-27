@@ -333,44 +333,48 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
         )
 
     def plot_2(self):
-        # 额定点工况温度随的变化
-
-        # lye_flow = OperatingCondition.Default.lye_flow
-        ambient_temperature_range = range(
-            OperatingRange.Contour.Ambient_temperature.left,
-            OperatingRange.Contour.Ambient_temperature.right,
-            OperatingRange.Contour.Ambient_temperature.step
-            )
-        current = OperatingCondition.Rated.current
-        lye_temperature = OperatingCondition.Rated.lye_temperature
-        
+        current_range = range(
+            OperatingRange.Contour.Current.left,
+            OperatingRange.Contour.Current.right,
+            OperatingRange.Contour.Current.step*10
+        )
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        temperature = 90
         lye_flow_range = np.arange(
             OperatingRange.Contour.Lye_flow.left,
             OperatingRange.Contour.Lye_flow.right,
             OperatingRange.Contour.Lye_flow.step
             )
+
         for lye_flow in lye_flow_range:
-            temperature_list = []
-            for ambient_temperature in ambient_temperature_range:
-                temperature_cur = self.electrolyzer.temperature_thermal_balance_current(
+            lye_temperature_list = []
+            for current in current_range:
+                lye_temperature_cur = self.electrolyzer.lye_temperature_for_given_condition_current(
+                    current=current,
+                    lye_flow=lye_flow,
+                    temperature=temperature,
                     ambient_temperature=ambient_temperature,
-                    lye_flow= lye_flow,
-                    lye_temperature = lye_temperature,
-                    current=current
                 )
-                temperature_list.append(temperature_cur)
+                lye_temperature_list.append(lye_temperature_cur)
             plt.plot(
-                ambient_temperature_range,
-                temperature_list,
-                label = np.round(lye_flow,1)
+                self.electrolyzer.current_2_density(current_range),
+                lye_temperature_list,
+                label = np.round(
+                    lye_flow,
+                    2
+                )
             )
-        plt.xlabel(r'$Ambient\ temperature (^\circ C)$')
-        plt.ylabel(r'$Outlet\ temperature (^\circ C)$')
-        # plt.ylim([85,90])
+        plt.xlabel(r'$Current\ density (A/m^2)$')
+        plt.ylabel(r'$Lye\ inlet\ temperature (^\circ C)$')
+        plt.ylim([
+            OperatingRange.Contour.Lye_temperature.left,
+            OperatingRange.Contour.Lye_temperature.right
+        ])
         plt.legend(
             title = r'$Lye\ flow (m^3/h)$',
-            loc = 'upper right'
+            loc = 'best'
         )
+        
 
     def plot_3(self):
         # 最优工况点随碱液流量的变化
@@ -448,7 +452,7 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
         ax2.set_ylim([60,70])
         ax2.set_yticks(range(60,71))
         ax1.set_ylim([70,120])
-
+        
 
 class Model_output_input_temperature_delta(QuadroPlotter):
     def __init__(

@@ -41,6 +41,12 @@ class Electrolyzer:
         ) # 碱液热容
         self.interval = self.parameters.interval
 
+    def current_2_density(self,current_range):
+        # 将给定的电流转化为电流密度
+        return np.array(
+            current_range
+        ) / self.active_surface_area
+
 
     @staticmethod
     def voltage_thermal_neutral(temperature):
@@ -324,6 +330,57 @@ class Electrolyzer:
             lye_temperature,
             current_density * self.active_surface_area
         )
+
+    def lye_temperature_for_given_condition_current(
+        self,
+        current,
+        lye_flow,
+        temperature,
+        ambient_temperature,
+    ):
+        """在给定出口温度、碱液流量、电流的情况下求解此时的碱液温度
+            因为没有发现更好的方法，暂时只能用dT来计算
+
+        Args:
+            lye_flow (_type_): 碱液流量
+            temperature (_type_): 出口温度
+            current (_type_): 电流
+        """
+        T_left = 0
+        T_right = 150
+        dT = 10
+        while abs(dT)>1E-6:
+            T_mid = (T_left + T_right) / 2
+            dT = self.dT_current(
+                current=current,
+                temperature=temperature,
+                ambient_temperature=ambient_temperature,
+                lye_flow=lye_flow,
+                lye_temperature=T_mid
+            )
+            if dT > 0:
+                T_right = T_mid
+            elif dT < 0 :
+                T_left = T_mid
+            else: 
+                return T_mid
+        return T_mid
+    
+    def lye_temperature_for_given_condition_current_density(
+        self,
+        current_density,
+        lye_flow,
+        temperature,
+        ambient_temperature,
+    ):
+        return self.lye_temperature_for_given_condition_current(
+            current_density * self.active_surface_area,
+            lye_flow,
+            temperature,
+            ambient_temperature,
+        )
+
+
 
     
     def power(self,current,voltage):
