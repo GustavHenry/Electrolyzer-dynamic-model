@@ -644,3 +644,195 @@ class Model_output_input_temperature_delta(QuadroPlotter):
         ax2.set_ylim([60,70])
         ax2.set_yticks(range(60,71))
         ax1.set_ylim([10,60])
+
+class Model_cooling_power_requirement(QuadroPlotter):
+    def __init__(
+        self, 
+        label="Thermal model", 
+        title="不同碱液流量下的电解槽冷却功率需求", 
+        num_subplot=4, 
+        title_plot=False
+    ) -> None:
+        super().__init__(label, title, num_subplot, title_plot)
+        self.electrolyzer = Electrolyzer()
+
+    def plot_1(self):
+        #不同碱液入口温度下电解槽出口温度
+
+        lye_temperature_range = range(
+            OperatingRange.Contour.Lye_temperature.left,
+            OperatingRange.Contour.Lye_temperature.right,
+            OperatingRange.Contour.Lye_temperature.step
+        )
+        current_range = range(
+            OperatingRange.Contour.Current.left,
+            OperatingRange.Contour.Current.right,
+            OperatingRange.Contour.Current.step
+        )
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        lye_flow = OperatingCondition.Default.lye_flow
+        cooling_power_matrix = np.ones(
+            (
+                len(lye_temperature_range),
+                len(current_range)
+            )
+        ) # 出口温度
+        for i in range(len(current_range)):
+            for j in range(len(lye_temperature_range)):
+                temperature_thermal_balance_cur  = (
+                    self.electrolyzer.temperature_thermal_balance_current(
+                        ambient_temperature=ambient_temperature,
+                        lye_flow=lye_flow,
+                        lye_temperature=lye_temperature_range[j],
+                        current = current_range[i]
+                    )
+                )
+                cooling_power_matrix[j,i] = self.electrolyzer.cooling_power_requirement(
+                    temperature=temperature_thermal_balance_cur,
+                    lye_temperature=lye_temperature_range[j],
+                    lye_flow=lye_flow,
+                )
+
+                if (
+                    lye_temperature_range[j] == OperatingCondition.Rated.lye_temperature
+                ) and (
+                    current_range[i]==OperatingCondition.Rated.current
+                ):
+                    cooling_power_default = cooling_power_matrix[j,i]
+                if (
+                    lye_temperature_range[j] == OperatingCondition.Optimal.lye_temperature
+                ) and (
+                    current_range[i]==OperatingCondition.Optimal.current
+                ):
+                    cooling_power_optimal = cooling_power_matrix[j,i]
+                    
+        self.plot_contour_map_with_2_points(
+            matrix= cooling_power_matrix,
+            x_range=np.array(current_range) ,
+            y_range=lye_temperature_range,
+            value_default=cooling_power_default,
+            value_optimal=cooling_power_optimal,
+            unit='kW'
+        )
+    
+    def plot_2(self):
+        # 这里画两条线，一条是冷却功率得绝对值，在不同碱液流量下的情况
+        # 还有一条线是冷却功率需求占总功率得比例
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        current = OperatingCondition.Rated.current
+        lye_temperature = OperatingCondition.Rated.lye_temperature
+        current_range = range(
+            OperatingRange.Cooling.Current.left,
+            OperatingRange.Cooling.Current.right,
+            OperatingRange.Cooling.Current.step,
+        )
+        
+        lye_flow_range = np.arange(
+            OperatingRange.Cooling.Lye_flow.left,
+            OperatingRange.Cooling.Lye_flow.right,
+            OperatingRange.Cooling.Lye_flow.step
+            )
+        self.cooling_power_ratio_list = []
+        self.lye_flow_list = []
+        for lye_flow in lye_flow_range:
+            cooling_power_list = []
+            cooling_power_ratio_list = []
+            for current in current_range:
+                temperature_cur = self.electrolyzer.temperature_thermal_balance_current(
+                    ambient_temperature=ambient_temperature,
+                    lye_flow= lye_flow,
+                    lye_temperature = lye_temperature,
+                    current=current
+                )
+                voltage_cur = self.electrolyzer.polar_current_lh(
+                    current = current,
+                    temperature=temperature_cur
+                )
+                cooling_power_cur = self.electrolyzer.cooling_power_requirement(
+                    temperature=temperature_cur,
+                    lye_temperature=lye_temperature,
+                    lye_flow=lye_flow
+                )
+                cooling_power_ratio_cur = cooling_power_cur / current / voltage_cur * 1000 *100
+                cooling_power_list.append(cooling_power_cur)
+                cooling_power_ratio_list.append(cooling_power_ratio_cur)
+            plt.plot(
+                np.array(current_range)/self.electrolyzer.active_surface_area,
+                cooling_power_list,
+                label = np.round(lye_flow,2)
+            )
+            self.cooling_power_ratio_list.append(cooling_power_ratio_list)
+            self.lye_flow_list.append(lye_flow)
+        self.current_range = current_range
+        plt.xlabel(r'$Current\ density\ (A/m^2)$')
+        plt.ylabel('Cooling power requirement (kW)')
+        plt.ylim([-15,40])
+        plt.legend(
+            title = r'$Lye\ flow (m^3/h)$',
+            loc = 'upper left'
+        )
+        
+
+    def plot_3(self):
+        lye_flow_range = np.arange(
+            OperatingRange.Cooling.Lye_flow.left,
+            OperatingRange.Cooling.Lye_flow.right,
+            OperatingRange.Cooling.Lye_flow.step/3
+        )
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+
+        cooling_power_list_optimal = []
+        cooling_power_list_rated = []
+        for lye_flow in lye_flow_range:
+            current = OperatingCondition.Optimal.current
+            lye_temperature = OperatingCondition.Optimal.lye_temperature
+            cooling_power_cur_optimal = self.electrolyzer.cooling_power_requirement(
+                temperature=self.electrolyzer.temperature_thermal_balance_current(
+                    ambient_temperature=ambient_temperature,
+                    lye_flow= lye_flow,
+                    lye_temperature = lye_temperature,
+                    current=current
+                ),
+                lye_temperature=lye_temperature,
+                lye_flow=lye_flow
+            )
+            current = OperatingCondition.Rated.current
+            lye_temperature = OperatingCondition.Rated.lye_temperature
+            cooling_power_cur_rated = self.electrolyzer.cooling_power_requirement(
+                temperature=self.electrolyzer.temperature_thermal_balance_current(
+                    ambient_temperature=ambient_temperature,
+                    lye_flow= lye_flow,
+                    lye_temperature = lye_temperature,
+                    current=current
+                ),
+                lye_temperature=lye_temperature,
+                lye_flow=lye_flow
+            )
+            cooling_power_list_optimal.append(cooling_power_cur_optimal)
+            cooling_power_list_rated.append(cooling_power_cur_rated)
+        ax1,ax2 = self.plot_double_y_axis(
+            x = lye_flow_range,
+            y1 = cooling_power_list_optimal,
+            y2 = cooling_power_list_rated,
+            x_title= r'$Lye\ flow (m^3/h)$',
+            y1_title='Cooling power requirement for optimal condition (kW)',
+            y2_title='Cooling power requirement for rated condition (kW)',
+        )
+        ax1.set_ylim([-10,10])
+        ax1.set_yticks(range(-10,10,2))
+        ax2.set_ylim([20,30])
+    
+    def plot_4(self):
+        for idx in range(len(self.lye_flow_list)):
+            plt.plot(
+                np.array(self.current_range)/self.electrolyzer.active_surface_area,
+                self.cooling_power_ratio_list[idx],
+                label = np.round(self.lye_flow_list[idx],2)
+            )
+        plt.xlabel(r'$Current\ density\ (A/m^2)$')
+        plt.ylabel('Cooling power requirement vs power input (%)')
+        plt.ylim([-25,50])
+        plt.legend(
+            title = r'$Lye\ flow (m^3/h)$',
+            loc = 'upper left'
+        )
