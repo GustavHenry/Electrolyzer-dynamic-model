@@ -48,6 +48,19 @@ class Plotter(ABC):
         y1_title,
         y2_title,
     ):
+        """画出具有双y轴的图像
+
+        Args:
+            x (_type_): x轴取值，应为range
+            y1 (_type_): y1轴取值，左侧，应为list
+            y2 (_type_): y2轴取值，右侧，yinweilist
+            x_title (_type_): x轴坐标轴标题
+            y1_title (_type_): y1轴坐标轴标题
+            y2_title (_type_): y2轴坐标轴标题
+
+        Returns:
+            _type_: _description_
+        """
         plt.xlabel(x_title)
         ax1 = plt.gca()
         ax1.plot(
@@ -79,18 +92,38 @@ class Plotter(ABC):
         value_optimal,
         xlabel = r'$Current\ density (A/m^2)$',
         ylabel = r'$Lye\ inlet\ temperature (^\circ C)$',
-        unit = r'$^\circ C$'
+        unit = r'$^\circ C$',
+        value_min = None,
+        value_max = None
     ):
+        """根据给出的矩阵，画出工况迈普图，主要为两维
+
+        Args:
+            matrix (_type_): 结果矩阵，维度为[碱液温度，电流]
+            x_range (_type_): 横坐标范围，应当为电流密度，内部不会转化电流密度
+            y_range (_type_): 纵坐标范围，应当为碱液温度
+            value_default (_type_): 默认工况点的取值
+            value_optimal (_type_): 最有工况点的取值
+            xlabel (regexp, optional): x坐标轴的标题. Defaults to r'\ density (A/m^2)$'.
+            ylabel (regexp, optional): y坐标轴标题. Defaults to r'\ inlet\ temperature (^\circ C)$'.
+            unit (regexp, optional): 取值单位，用于显示在途中. Defaults to r'$^\circ C$'.
+            value_min (_type_, optional): 显示的最低值，默认不存在. Defaults to None.
+            value_max (_type_, optional): 显示的最大值，默认不存在. Defaults to None.
+        """
         from thermal_model.configs import OperatingCondition
-        temperature_maximum = max(matrix.flatten())
-        temperature_minimum = min(matrix.flatten())
+        value_maximum = max(matrix.flatten())
+        value_minimum = min(matrix.flatten())
+        if value_min:
+            value_minimum = value_min
+        if value_max:
+            value_maximum = value_max
         contour_levels = np.arange(
-            temperature_minimum,
-            temperature_maximum,
-            (temperature_maximum - temperature_minimum)/10
+            value_minimum,
+            value_maximum,
+            (value_maximum - value_minimum)/10
         )
         contour_figure = plt.contourf(
-            np.array(x_range) / self.electrolyzer.active_surface_area,
+            np.array(x_range),
             y_range,
             matrix,
             contour_levels,

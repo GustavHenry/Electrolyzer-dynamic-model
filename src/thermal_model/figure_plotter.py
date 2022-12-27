@@ -511,7 +511,7 @@ class Model_output_input_temperature_delta(QuadroPlotter):
                     temperature_optimal = temperature_matrix[j,i]
         self.plot_contour_map_with_2_points(
             matrix= temperature_matrix,
-            x_range=np.array(current_range) ,
+            x_range=np.array(current_range)  / self.electrolyzer.active_surface_area,
             y_range=lye_temperature_range,
             value_default=temperature_default,
             value_optimal=temperature_optimal,
@@ -657,8 +657,6 @@ class Model_cooling_power_requirement(QuadroPlotter):
         self.electrolyzer = Electrolyzer()
 
     def plot_1(self):
-        #不同碱液入口温度下电解槽出口温度
-
         lye_temperature_range = range(
             OperatingRange.Contour.Lye_temperature.left,
             OperatingRange.Contour.Lye_temperature.right,
@@ -676,7 +674,7 @@ class Model_cooling_power_requirement(QuadroPlotter):
                 len(lye_temperature_range),
                 len(current_range)
             )
-        ) # 出口温度
+        ) # 冷却功率需求
         for i in range(len(current_range)):
             for j in range(len(lye_temperature_range)):
                 temperature_thermal_balance_cur  = (
@@ -708,7 +706,7 @@ class Model_cooling_power_requirement(QuadroPlotter):
                     
         self.plot_contour_map_with_2_points(
             matrix= cooling_power_matrix,
-            x_range=np.array(current_range) ,
+            x_range=np.array(current_range) / self.electrolyzer.active_surface_area ,
             y_range=lye_temperature_range,
             value_default=cooling_power_default,
             value_optimal=cooling_power_optimal,

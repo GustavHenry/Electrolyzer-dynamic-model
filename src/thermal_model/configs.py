@@ -174,6 +174,16 @@ class OperatingCondition:
         lye_flow = 1.2 # m^3/h
         lye_temperature = 60   # degree C
     
+
+class LifeCycle:
+    cooling_efficiency = 0.5 # 冷却系统冷却效率
+    price = 762000 # 购置价格
+    service_year = 15 # 服役年限
+    hour_in_year = 24*365 # 每年小时数
+    service_rate = 0.8 # 开工率
+    electricity_price = 0.4 # 电价，元/度电
+    profit_margin = 0.2 # 
+
 class OperatingRange:
     class Contour:
         # current density vs lye inlet temperature
