@@ -176,7 +176,8 @@ class OperatingCondition:
     
 
 class LifeCycle:
-    cooling_efficiency = 0.5 # 冷却系统冷却效率
+    cooling_efficiency = 0.35 # 冷却系统冷却效率
+    heating_efficiency = 0.98 # 加热设备的效率，假设使用直接电加热
     price = 762000 # 购置价格
     service_year = 15 # 服役年限
     hour_in_year = 24*365 # 每年小时数

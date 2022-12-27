@@ -41,6 +41,7 @@ class Cache:
 
 
 class Constants:
+    seconds_in_hour = 3600
     seconds_in_day = 24 * 3600  # 每日中的秒数
     num_cells = 34  # 电解槽片数
     active_area = 0.425  # 电解槽活性面积
@@ -57,6 +58,9 @@ class Constants:
         2.2625  # kJ/(kg*K), the specific heat capacity of the alkaline
     )
 
+    R = 96485 # 理想气体常数
+    std_volume = 22.4 # mol/L
+    
 
 class PolarizationLihao:
     r1 = 0.0001362
