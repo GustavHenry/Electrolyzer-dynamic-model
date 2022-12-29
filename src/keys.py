@@ -43,6 +43,7 @@ class Cache:
 class Constants:
     seconds_in_hour = 3600
     seconds_in_day = 24 * 3600  # 每日中的秒数
+    hours_in_year = 365*24 # 每日年中小时数
     num_cells = 34  # 电解槽片数
     active_area = 0.425  # 电解槽活性面积
     absolute_temp_delta = 273.15  # 绝对零度到零摄氏度的差值
@@ -60,7 +61,7 @@ class Constants:
 
     R = 96485 # 理想气体常数
     std_volume = 22.4 # mol/L
-    
+    weight_hydrogen = 2 # g/mol
 
 class PolarizationLihao:
     r1 = 0.0001362

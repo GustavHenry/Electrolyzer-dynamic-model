@@ -182,8 +182,9 @@ class LifeCycle:
     service_year = 15 # 服役年限
     hour_in_year = 24*365 # 每年小时数
     service_rate = 0.8 # 开工率
-    electricity_price = 0.4 # 电价，元/度电
-    profit_margin = 0.2 # 
+    electricity_price = 0.5 # 电价，元/度电
+    additional_cost = 0.2 # 除去电价与均摊成本后，仍有额外20%的成本
+    RMB_2_USD = 0.14 # 人民币与美元汇率
 
 class OperatingRange:
     class Contour:
