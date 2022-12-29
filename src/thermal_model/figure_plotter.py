@@ -3,6 +3,8 @@ from plotter import *
 import seaborn as sns
 from thermal_model.configs import *
 from thermal_model.electrolyzer import Electrolyzer
+from thermal_model.data import ThermalModelData,generate_model_input
+from thermal_model.thermal_model import fit_random_forest,model_estimator
 
 class Initial_delta_temp_histplot(Plotter):
     """主要用于展示最初读取数据并预处理完成后，分析展示原始的温度差分结果
@@ -13,13 +15,12 @@ class Initial_delta_temp_histplot(Plotter):
 
     def __init__(
         self,
-        df_thermal_model_data_raw,  # ThermalModelData().load()
         label="Thermal model",
         title="经过小波变换之后原始数据中的温度差分",
         title_plot=True,
     ) -> None:
         super().__init__(label, title, num_subplot=1, title_plot=title_plot)
-        self.df_thermal_model_data_raw = df_thermal_model_data_raw
+        self.df_thermal_model_data_raw = ThermalModelData().load()
 
     def plot(self):
         sns.histplot(self.df_thermal_model_data_raw[Cols.delta_temp], bins=100)
@@ -36,14 +37,13 @@ class Initial_delta_temp_pairplot(Plotter):
 
     def __init__(
         self,
-        df_thermal_model_data_raw,  # ThermalModelData().load()
         label="Thermal model",
         title="原始数据中相关项的配对分析",
         num_subplot=1,
         title_plot=False,
     ) -> None:
         super().__init__(label, title, num_subplot, title_plot)
-        self.df_thermal_model_data_raw = df_thermal_model_data_raw
+        self.df_thermal_model_data_raw = ThermalModelData().load()
 
     def plot(self):
         self.df_thermal_model_data_raw.rename(
@@ -74,14 +74,14 @@ class Initial_delta_temp_pairplot(Plotter):
 class Model_input_data_pairplot(Plotter):
     def __init__(
         self,
-        df_thermal_model_data_input,  # generate_model_input(df_thermal_model_data_raw)
         label="Thermal model",
         title="模型输入数据中相关项的配对分析",
         num_subplot=1,
         title_plot=False,
     ) -> None:
         super().__init__(label, title, num_subplot, title_plot)
-        self.df_thermal_model_data_input = df_thermal_model_data_input
+        df_thermal_model_data_raw = ThermalModelData().load()
+        self.df_thermal_model_data_input = generate_model_input(df_thermal_model_data_raw)
 
     def plot(self):
         sns.pairplot(
@@ -93,14 +93,18 @@ class Model_input_data_pairplot(Plotter):
 class Model_default_polarization_curve(Plotter):
     def __init__(
         self, 
-        current_list,
-        voltage_list,
         label="Thermal model", 
         title="电解槽极化曲线", 
         num_subplot=1, 
         title_plot=True
     ) -> None:
         super().__init__(label, title, num_subplot, title_plot)
+        (
+            current_list,
+            voltage_list,
+            power_list,
+            temperature_list
+        ) = Electrolyzer().get_default_polarization()
         self.current_list = np.squeeze(current_list)
         self.voltage_list = np.squeeze(voltage_list)
 
@@ -111,8 +115,6 @@ class Model_default_polarization_curve(Plotter):
 class Thermal_model_regression_scatter(Plotter):
     def __init__(
         self, 
-        model_target,
-        model_predict,
         label="Thermal model", 
         title_model="随机森林", # 也可以是线性回归
         num_subplot=1, 
@@ -120,6 +122,13 @@ class Thermal_model_regression_scatter(Plotter):
     ) -> None:
         title = "使用{}进行回归分析的误差结果".format(title_model)
         super().__init__(label, title, num_subplot, title_plot)
+        df_thermal_model_data_raw = ThermalModelData().load()
+        df_thermal_model_data_input = generate_model_input(df_thermal_model_data_raw)
+
+        model_random_forest,model_input,model_target = fit_random_forest(df_thermal_model_data_input,6)
+        ( model_predict, error) = model_estimator(
+            model_random_forest,model_input,model_target
+        )
         self.model_target = np.array(model_target)
         self.model_predict = np.array(model_predict)
     
@@ -139,8 +148,6 @@ class Thermal_model_regression_scatter(Plotter):
 class Thermal_model_regression_error_histplot(Plotter):
     def __init__(
         self, 
-        model_target,
-        error,
         label="Thermal model", 
         title_model="随机森林", # 也可以是线性回归
         num_subplot=1, 
@@ -148,6 +155,13 @@ class Thermal_model_regression_error_histplot(Plotter):
     ) -> None:
         title = "使用{}进行回归分析的误差统计结果".format(title_model)
         super().__init__(label, title, num_subplot, title_plot)
+        df_thermal_model_data_raw = ThermalModelData().load()
+        df_thermal_model_data_input = generate_model_input(df_thermal_model_data_raw)
+
+        model_random_forest,model_input,model_target = fit_random_forest(df_thermal_model_data_input,6)
+        ( model_predict, error) = model_estimator(
+            model_random_forest,model_input,model_target
+        )
         self.model_target = model_target
         self.error = error
     
@@ -166,8 +180,6 @@ class Thermal_model_regression_error_histplot(Plotter):
 class Thermal_model_regression_cumulative_error_plot(Plotter):
     def __init__(
         self, 
-        model_target,
-        model_predict,
         label="Thermal model", 
         title_model="随机森林", # 也可以是线性回归
         num_subplot=1, 
@@ -175,6 +187,13 @@ class Thermal_model_regression_cumulative_error_plot(Plotter):
     ) -> None:
         title = "使用{}进行回归的结果累计误差显示".format(title_model)
         super().__init__(label, title, num_subplot, title_plot)
+        df_thermal_model_data_raw = ThermalModelData().load()
+        df_thermal_model_data_input = generate_model_input(df_thermal_model_data_raw)
+
+        model_random_forest,model_input,model_target = fit_random_forest(df_thermal_model_data_input,6)
+        ( model_predict, error) = model_estimator(
+            model_random_forest,model_input,model_target
+        )
         self.model_target = model_target
         self.model_predict = model_predict
     
