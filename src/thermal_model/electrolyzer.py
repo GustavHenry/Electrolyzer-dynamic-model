@@ -741,6 +741,29 @@ class Electrolyzer:
 
         return hydrogen_cost
     
+    def hydrogen_cost_lifecycle_USD(
+        self,
+        lye_temperature,
+        lye_flow,
+        ambient_temperature,
+        currency_exchange_rate = LifeCycle.RMB_2_USD,
+        electricity_price = LifeCycle.electricity_price,
+        electrolyzer_price = LifeCycle.price,
+        cooling_efficiency = LifeCycle.cooling_efficiency,
+        heating_efficiency = LifeCycle.heating_efficiency,
+        additional_cost = LifeCycle.additional_cost
+    ):
+        return self.hydrogen_cost_lifecycle(
+            lye_temperature,
+            lye_flow,
+            ambient_temperature,
+            electricity_price ,
+            electrolyzer_price,
+            cooling_efficiency,
+            heating_efficiency,
+            additional_cost
+        ) * currency_exchange_rate
+    
     def hydrogen_cost_lifecycle_current_density(
         self,
         current_density,
