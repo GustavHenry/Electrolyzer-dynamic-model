@@ -675,6 +675,69 @@ class Electrolyzer:
             heating_efficiency = heating_efficiency
         )
 
+    def electricity_cost_lifecycle(
+        self,
+        current,
+        lye_temperature,
+        lye_flow,
+        ambient_temperature,
+        cooling_efficiency,
+        heating_efficiency,
+        electricity_price
+    ):
+        electricity_lifecycle = self.power_total(
+            current=current,
+            lye_temperature=lye_temperature,
+            lye_flow=lye_flow,
+            ambient_temperature=ambient_temperature,
+            cooling_efficiency=cooling_efficiency,
+            heating_efficiency=heating_efficiency,
+        ) * (
+            LifeCycle.service_year * LifeCycle.hour_in_year * LifeCycle.service_rate
+        )
+        electricity_cost_lifecycle = electricity_lifecycle * electricity_price
+        return electricity_cost_lifecycle
+
+    def hydrogen_production_lifecycle(
+        self,
+        current,
+        ambient_temperature,
+        lye_flow,
+        lye_temperature
+    ):
+        """计算给定条件下全生命周期的制氢量，结果为kg H2
+
+        Args:
+            current (_type_): _description_
+            ambient_temperature (_type_): _description_
+            lye_flow (_type_): _description_
+            lye_temperature (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        faraday_efficiency = self.faraday_efficiency_current(
+            current=current,
+            temperature=self.temperature_thermal_balance_current(
+                current=current,
+                ambient_temperature=ambient_temperature,
+                lye_flow=lye_flow,
+                lye_temperature=lye_temperature,
+            )
+        )
+        hydrogen_production_hour = (
+            current / Constants.weight_hydrogen / Constants.R 
+        )* (
+            Constants.std_volume / 1000
+        ) * (
+            self.num_cells * faraday_efficiency*Constants.seconds_in_hour
+        ) * (
+            Constants.weight_hydrogen/Constants.std_volume
+        ) # 每小时氢气产量，kg
+        hydrogen_production_year = hydrogen_production_hour * Constants.hours_in_year
+        hydrogen_production_lifecycle = hydrogen_production_year * LifeCycle.service_year * LifeCycle.service_rate
+        return hydrogen_production_lifecycle
+
     def hydrogen_cost_lifecycle(
         self,
         current,
@@ -703,38 +766,22 @@ class Electrolyzer:
         Returns:
             _type_: _description_
         """
-        electricity_lifecycle = self.power_total(
+        electricity_cost_lifecycle = self.electricity_cost_lifecycle(
             current=current,
             lye_temperature=lye_temperature,
             lye_flow=lye_flow,
             ambient_temperature=ambient_temperature,
             cooling_efficiency=cooling_efficiency,
             heating_efficiency=heating_efficiency,
-        ) * (
-            LifeCycle.service_year * LifeCycle.hour_in_year * LifeCycle.service_rate
+            electricity_price = electricity_price
         )
-        electricity_cost_lifecycle = electricity_lifecycle * electricity_price
         total_cost_lifecycle = electricity_cost_lifecycle + electrolyzer_price
-        faraday_efficiency = self.faraday_efficiency_current(
+        hydrogen_production_lifecycle = self.hydrogen_production_lifecycle(
             current=current,
-            temperature=self.temperature_thermal_balance_current(
-                current=current,
-                ambient_temperature=ambient_temperature,
-                lye_flow=lye_flow,
-                lye_temperature=lye_temperature,
-            )
+            ambient_temperature=ambient_temperature,
+            lye_flow=lye_flow,
+            lye_temperature=lye_temperature
         )
-        hydrogen_production_hour = (
-            current / Constants.weight_hydrogen / Constants.R 
-        )* (
-            Constants.std_volume / 1000
-        ) * (
-            self.num_cells * faraday_efficiency*Constants.seconds_in_hour
-        ) * (
-            Constants.weight_hydrogen/Constants.std_volume
-        ) # 每小时氢气产量，kg
-        hydrogen_production_year = hydrogen_production_hour * Constants.hours_in_year
-        hydrogen_production_lifecycle = hydrogen_production_year * LifeCycle.service_year * LifeCycle.service_rate
         hydrogen_cost = total_cost_lifecycle / hydrogen_production_lifecycle * (
             1 + additional_cost
         )
@@ -743,6 +790,7 @@ class Electrolyzer:
     
     def hydrogen_cost_lifecycle_USD(
         self,
+        current,
         lye_temperature,
         lye_flow,
         ambient_temperature,
@@ -754,6 +802,7 @@ class Electrolyzer:
         additional_cost = LifeCycle.additional_cost
     ):
         return self.hydrogen_cost_lifecycle(
+            current,
             lye_temperature,
             lye_flow,
             ambient_temperature,
