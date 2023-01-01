@@ -185,6 +185,10 @@ class LifeCycle:
     electricity_price = 0.5 # 电价，元/度电
     additional_cost = 0.2 # 除去电价与均摊成本后，仍有额外20%的成本
     RMB_2_USD = 0.14 # 人民币与美元汇率
+    class ElectrolyzerPriceRange:
+        left = 100000
+        right = 800000
+        step = 50000
 
 class OperatingRange:
     class Contour:

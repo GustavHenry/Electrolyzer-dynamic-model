@@ -271,7 +271,7 @@ class HexaPlotter(Plotter):
     
     def plot(self):
         plt.subplots_adjust(
-            left=0.05, bottom=0.1, right=0.95, top=0.9, wspace=0.2, hspace=0.15
+            left=0.05, bottom=0.1, right=0.95, top=0.9, wspace=0.18, hspace=0.15
         )
         plt.subplot(3,2,1)
         self.plot_1()

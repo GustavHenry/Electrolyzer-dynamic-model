@@ -812,6 +812,154 @@ class Electrolyzer:
             heating_efficiency,
             additional_cost
         ) * currency_exchange_rate
+
+
+    def power_detail(
+        self,
+        current,
+        ambient_temperature,
+        lye_flow,
+        lye_temperature,
+        cooling_efficiency = LifeCycle.cooling_efficiency,
+        heating_efficiency = LifeCycle.heating_efficiency
+    ):
+        """给定条件下给出电解槽系统的制氢功率与冷却功率
+
+        Args:
+            current (_type_): 电流，A
+            ambient_temperature (_type_): 环境温度
+            lye_flow (_type_): 碱液流量
+            lye_temperature (_type_): 碱液温度
+
+        Returns:
+            _type_: 电解槽系统制氢功率与冷却功率，kW
+        """
+        temperature = self.temperature_thermal_balance_current(
+            ambient_temperature=ambient_temperature,
+            lye_flow=lye_flow,
+            lye_temperature=lye_temperature,
+            current=current,
+        )
+        cooling_power = self.cooling_power_requirement(
+            temperature=temperature,
+            lye_temperature=lye_temperature,
+            lye_flow=lye_flow
+        )
+
+        voltage = self.polar_current_lh(
+            current=current,
+            temperature=temperature
+        )
+        power = self.power(
+            current=current,
+            voltage=voltage
+        )
+        if cooling_power>0:
+            return power, cooling_power * cooling_efficiency
+        else:
+            return power, abs(cooling_power) * heating_efficiency
+
+    def electricity_cost_lifecycle_detail(
+        self,
+        current,
+        lye_temperature,
+        lye_flow,
+        ambient_temperature,
+        cooling_efficiency,
+        heating_efficiency,
+        electricity_price
+    ):
+        electrolysis_power,cooling_power = self.power_total(
+            current=current,
+            lye_temperature=lye_temperature,
+            lye_flow=lye_flow,
+            ambient_temperature=ambient_temperature,
+            cooling_efficiency=cooling_efficiency,
+            heating_efficiency=heating_efficiency,
+        ) 
+        electricity_electrolysis_lifecycle = electrolysis_power* (
+            LifeCycle.service_year * LifeCycle.hour_in_year * LifeCycle.service_rate
+        )
+        electricity_cooling_lifecycle = cooling_power * (
+            LifeCycle.service_year * LifeCycle.hour_in_year * LifeCycle.service_rate
+        )
+        electricity_electrolysis_lifecycle *= electricity_price
+        electricity_cooling_lifecycle *=electricity_price
+        return (
+            electricity_electrolysis_lifecycle,
+            electricity_cooling_lifecycle
+        )
+
+    def hydrogen_cost_lifecycle_detail(
+        self,
+        current,
+        lye_temperature,
+        lye_flow,
+        ambient_temperature,
+        electricity_price = LifeCycle.electricity_price,
+        electrolyzer_price = LifeCycle.price,
+        cooling_efficiency = LifeCycle.cooling_efficiency,
+        heating_efficiency = LifeCycle.heating_efficiency,
+        additional_cost = LifeCycle.additional_cost
+    ):
+        (    
+            electricity_electrolysis_cost_lifecycle,
+            electricity_cooling_cost_lifecycle
+        ) = self.electricity_cost_lifecycle_detail(
+            current=current,
+            lye_temperature=lye_temperature,
+            lye_flow=lye_flow,
+            ambient_temperature=ambient_temperature,
+            cooling_efficiency=cooling_efficiency,
+            heating_efficiency=heating_efficiency,
+            electricity_price = electricity_price
+        )
+
+        total_cost_lifecycle = electricity_electrolysis_cost_lifecycle + electricity_cooling_cost_lifecycle + electrolyzer_price
+        hydrogen_production_lifecycle = self.hydrogen_production_lifecycle(
+            current=current,
+            ambient_temperature=ambient_temperature,
+            lye_flow=lye_flow,
+            lye_temperature=lye_temperature
+        )
+        
+        hydrogen_cost_electrolysis = electricity_electrolysis_cost_lifecycle / hydrogen_production_lifecycle
+        hydrogen_cost_cooling = electricity_cooling_cost_lifecycle / hydrogen_production_lifecycle
+        hydrogen_cost_electrolyzer = electrolyzer_price / hydrogen_production_lifecycle
+        hydrogen_cost_additional = total_cost_lifecycle / hydrogen_production_lifecycle *  additional_cost
+
+        return (
+            hydrogen_cost_electrolyzer,
+            hydrogen_cost_electrolysis,
+            hydrogen_cost_cooling,
+            hydrogen_cost_additional
+        )
+
+    def hydrogen_cost_lifecycle_detail_USD(
+        self,
+        
+        current,
+        lye_temperature,
+        lye_flow,
+        ambient_temperature,
+        currency_exchange_rate = LifeCycle.RMB_2_USD,
+        electricity_price = LifeCycle.electricity_price,
+        electrolyzer_price = LifeCycle.price,
+        cooling_efficiency = LifeCycle.cooling_efficiency,
+        heating_efficiency = LifeCycle.heating_efficiency,
+        additional_cost = LifeCycle.additional_cost
+    ):
+        return self.hydrogen_cost_lifecycle_detail(
+            current = current,
+            lye_temperature = lye_temperature,
+            lye_flow=lye_flow,
+            ambient_temperature = ambient_temperature,
+            electricity_price= electricity_price,
+            electrolyzer_price = electrolyzer_price,
+            cooling_efficiency = cooling_efficiency,
+            heating_efficiency = heating_efficiency,
+            additional_cost= additional_cost
+        ) * currency_exchange_rate
     
     def hydrogen_cost_lifecycle_current_density(
         self,
