@@ -24,8 +24,19 @@ def standard_data_prepare(df, history_ambt_temp):
 class ThermalModelData(Loader):
     """自动判断是否已经进行了excel的转化，如果没有就先转换excel然后再存成pickle"""
 
-    def __init__(self, fp_cache=Cache.thermal_model_data_1101) -> None:
+    def __init__(
+        self, 
+        mode = 'all'
+        ) -> None:
+        if mode == 'all':
+            fp_cache=Cache.thermal_model_data_1101
+        else:
+            fp_cache=Cache.thermal_model_data_0102
+
         super().__init__(fp_cache)
+        self.mode = mode
+        self.source_folder = DataDir.Int_thermal_model
+        
         if not os.path.exists(DataDir.Int_thermal_model):
             os.makedirs(
                 DataDir.Int_thermal_model,
@@ -45,19 +56,40 @@ class ThermalModelData(Loader):
             df.to_csv(os.path.join(DataDir.Int_thermal_model, file), encoding=ENCODING)
 
     def concat_all_raw_data(self):
-        source_folder = DataDir.Int_thermal_model
-        if len(os.listdir(source_folder)) < 1:
-            ThermalModelData.read_convert_raw_data_from_excel()
         raw_data_list = []
-        print("---Concating all raw data from csv")
-        for file in os.listdir(source_folder):
-            df_cur = pd.read_csv(os.path.join(source_folder, file))
+        print("---Concatenating all raw data from csv")
+        for file in os.listdir(self.source_folder):
+            df_cur = pd.read_csv(os.path.join(self.source_folder, file))
             raw_data_list.append(df_cur)
+        df_raw_data = pd.concat(raw_data_list, ignore_index=True)
+        return df_raw_data
+    
+    def concat_pseudo_static_data(self):
+        raw_data_list = []
+        file_list = [
+            '1001',
+            '1014',
+            '1007',
+            '1029',
+            '1123',
+            '1128',
+            '0924'
+        ]
+        print("---Concatenating pseudo static data from csv")
+        for file in os.listdir(self.source_folder):
+            if file[7:11] in file_list:
+                df_cur = pd.read_csv(os.path.join(self.source_folder, file))
+                raw_data_list.append(df_cur)
         df_raw_data = pd.concat(raw_data_list, ignore_index=True)
         return df_raw_data
 
     def run(self):
-        df_raw_data = self.concat_all_raw_data()
+        if len(os.listdir(self.source_folder)) < 1:
+            ThermalModelData.read_convert_raw_data_from_excel()
+        if self.mode == 'all':
+            df_raw_data = self.concat_all_raw_data()
+        else:
+            df_raw_data = self.concat_pseudo_static_data()
 
         return df_raw_data
 

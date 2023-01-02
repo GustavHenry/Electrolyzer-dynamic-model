@@ -37,7 +37,8 @@ class LoaderType:
 
 class Cache:
     """储存一些文件的中间缓存，用于统一缓存的读取与识别"""
-    thermal_model_data_1101 = "thermal_model_data_1101"  # 重写刚开始时，简单讲所有数据拼接在一起
+    thermal_model_data_1101 = "thermal_model_data_1101" # 重写刚开始时，简单讲所有数据拼接在一起
+    thermal_model_data_0102 = "thermal_modal_data_0102" # 抽选出适合作为热模型数据的准静态输入部分，并进行拼接
 
 
 class Constants:
