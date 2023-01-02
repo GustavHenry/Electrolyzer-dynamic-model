@@ -855,9 +855,9 @@ class Electrolyzer:
             voltage=voltage
         )
         if cooling_power>0:
-            return power, cooling_power * cooling_efficiency
+            return (power, cooling_power * cooling_efficiency)
         else:
-            return power, abs(cooling_power) * heating_efficiency
+            return (power, abs(cooling_power) * heating_efficiency)
 
     def electricity_cost_lifecycle_detail(
         self,
@@ -865,11 +865,12 @@ class Electrolyzer:
         lye_temperature,
         lye_flow,
         ambient_temperature,
-        cooling_efficiency,
-        heating_efficiency,
-        electricity_price
+        electricity_price,
+        cooling_efficiency = LifeCycle.cooling_efficiency,
+        heating_efficiency = LifeCycle.heating_efficiency
+        
     ):
-        electrolysis_power,cooling_power = self.power_total(
+        (electrolysis_power,cooling_power) = self.power_detail(
             current=current,
             lye_temperature=lye_temperature,
             lye_flow=lye_flow,
@@ -877,14 +878,13 @@ class Electrolyzer:
             cooling_efficiency=cooling_efficiency,
             heating_efficiency=heating_efficiency,
         ) 
-        electricity_electrolysis_lifecycle = electrolysis_power* (
-            LifeCycle.service_year * LifeCycle.hour_in_year * LifeCycle.service_rate
+
+        electricity_electrolysis_lifecycle = electrolysis_power * (
+            LifeCycle.service_year * LifeCycle.hour_in_year * LifeCycle.service_rate * electricity_price
         )
         electricity_cooling_lifecycle = cooling_power * (
-            LifeCycle.service_year * LifeCycle.hour_in_year * LifeCycle.service_rate
+            LifeCycle.service_year * LifeCycle.hour_in_year * LifeCycle.service_rate * electricity_price
         )
-        electricity_electrolysis_lifecycle *= electricity_price
-        electricity_cooling_lifecycle *=electricity_price
         return (
             electricity_electrolysis_lifecycle,
             electricity_cooling_lifecycle
@@ -949,7 +949,12 @@ class Electrolyzer:
         heating_efficiency = LifeCycle.heating_efficiency,
         additional_cost = LifeCycle.additional_cost
     ):
-        return self.hydrogen_cost_lifecycle_detail(
+        (
+            hydrogen_cost_electrolyzer,
+            hydrogen_cost_electrolysis,
+            hydrogen_cost_cooling,
+            hydrogen_cost_additional
+        ) = self.hydrogen_cost_lifecycle_detail(
             current = current,
             lye_temperature = lye_temperature,
             lye_flow=lye_flow,
@@ -959,7 +964,17 @@ class Electrolyzer:
             cooling_efficiency = cooling_efficiency,
             heating_efficiency = heating_efficiency,
             additional_cost= additional_cost
-        ) * currency_exchange_rate
+        )
+        hydrogen_cost_electrolyzer *= currency_exchange_rate
+        hydrogen_cost_electrolysis *= currency_exchange_rate
+        hydrogen_cost_cooling *= currency_exchange_rate
+        hydrogen_cost_additional *= currency_exchange_rate
+        return (
+            hydrogen_cost_electrolyzer,
+            hydrogen_cost_electrolysis,
+            hydrogen_cost_cooling,
+            hydrogen_cost_additional
+        )
     
     def hydrogen_cost_lifecycle_current_density(
         self,

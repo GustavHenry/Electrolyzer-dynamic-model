@@ -1077,3 +1077,451 @@ class Model_efficiency_hydrogen_cost(QuadroPlotter):
         plt.legend(
             title = 'Operating condition'
         )
+
+class Model_life_cycle_hydrogen_cost(HexaPlotter):
+    def __init__(
+        self, 
+        label="Thermal model", 
+        title="不同工况下电解槽全生命周期制氢成本", 
+        num_subplot=6, 
+        title_plot=False
+    ) -> None:
+        super().__init__(label, title, num_subplot, title_plot)
+        # 还可以讨论整个生命周期的盈利？或者收入？
+        
+        self.electrolyzer = Electrolyzer()
+    
+    def plot_1(self):
+        lye_temperature_range = range(
+            OperatingRange.Contour.Lye_temperature.left,
+            OperatingRange.Contour.Lye_temperature.right,
+            OperatingRange.Contour.Lye_temperature.step
+        )
+        current_range = range(
+            OperatingRange.Contour.Current.left,
+            OperatingRange.Contour.Current.right,
+            OperatingRange.Contour.Current.step
+        )
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        lye_flow = OperatingCondition.Default.lye_flow
+        electricity_price = LifeCycle.electricity_price
+        electrolyzer_price = 250000
+        cooling_efficiency = LifeCycle.cooling_efficiency
+        heating_efficiency = LifeCycle.heating_efficiency
+        cost_matrix = np.ones(
+            (
+                len(lye_temperature_range),
+                len(current_range)
+            )
+        ) # 电解槽全生命周期制氢成本
+        for i in range(len(current_range)):
+            for j in range(len(lye_temperature_range)):
+
+                current = current_range[i]
+                lye_temperature = lye_temperature_range[j]
+                cost_matrix[j,i] = self.electrolyzer.hydrogen_cost_lifecycle_USD(
+                    current=current,
+                    ambient_temperature=ambient_temperature,
+                    lye_flow=lye_flow,
+                    lye_temperature=lye_temperature,
+                    cooling_efficiency=cooling_efficiency,
+                    heating_efficiency=heating_efficiency,
+                    electricity_price=electricity_price,
+                    electrolyzer_price=electrolyzer_price,
+                )
+                
+        cost_default = self.electrolyzer.hydrogen_cost_lifecycle_USD(
+                    current=OperatingCondition.Rated.current,
+                    lye_temperature=OperatingCondition.Rated.lye_temperature,
+                    ambient_temperature=ambient_temperature,
+                    lye_flow=lye_flow,
+                    cooling_efficiency=cooling_efficiency,
+                    heating_efficiency=heating_efficiency,
+                    electricity_price=electricity_price,
+                    electrolyzer_price=electrolyzer_price,
+                )
+        cost_optimal = self.electrolyzer.hydrogen_cost_lifecycle_USD(
+                    current=OperatingCondition.Optimal.current,
+                    lye_temperature=OperatingCondition.Optimal.lye_temperature,
+                    ambient_temperature=ambient_temperature,
+                    lye_flow=lye_flow,
+                    cooling_efficiency=cooling_efficiency,
+                    heating_efficiency=heating_efficiency,
+                    electricity_price=electricity_price,
+                    electrolyzer_price=electrolyzer_price,
+                )
+        self.plot_contour_map_with_2_points(
+            matrix=cost_matrix,
+            x_range=np.array(current_range) / self.electrolyzer.active_surface_area,
+            y_range=lye_temperature_range,
+            value_default=cost_default,
+            value_optimal=cost_optimal,
+            unit=' $USD/kg',
+            value_max=5.6,
+            value_min=4.4
+        )
+
+    def plot_2(self):
+        lye_temperature_range = range(
+            OperatingRange.Contour.Lye_temperature.left,
+            OperatingRange.Contour.Lye_temperature.right,
+            OperatingRange.Contour.Lye_temperature.step
+        )
+        current_range = range(
+            OperatingRange.Contour.Current.left,
+            OperatingRange.Contour.Current.right,
+            OperatingRange.Contour.Current.step
+        )
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        lye_flow = OperatingCondition.Default.lye_flow
+        electricity_price = LifeCycle.electricity_price
+        electrolyzer_price = 500000
+        cooling_efficiency = LifeCycle.cooling_efficiency
+        heating_efficiency = LifeCycle.heating_efficiency
+        cost_matrix = np.ones(
+            (
+                len(lye_temperature_range),
+                len(current_range)
+            )
+        ) # 电解槽全生命周期制氢成本
+        for i in range(len(current_range)):
+            for j in range(len(lye_temperature_range)):
+
+                current = current_range[i]
+                lye_temperature = lye_temperature_range[j]
+                cost_matrix[j,i] = self.electrolyzer.hydrogen_cost_lifecycle_USD(
+                    current=current,
+                    ambient_temperature=ambient_temperature,
+                    lye_flow=lye_flow,
+                    lye_temperature=lye_temperature,
+                    cooling_efficiency=cooling_efficiency,
+                    heating_efficiency=heating_efficiency,
+                    electricity_price=electricity_price,
+                    electrolyzer_price=electrolyzer_price,
+                )
+                
+        cost_default = self.electrolyzer.hydrogen_cost_lifecycle_USD(
+                    current=OperatingCondition.Rated.current,
+                    lye_temperature=OperatingCondition.Rated.lye_temperature,
+                    ambient_temperature=ambient_temperature,
+                    lye_flow=lye_flow,
+                    cooling_efficiency=cooling_efficiency,
+                    heating_efficiency=heating_efficiency,
+                    electricity_price=electricity_price,
+                    electrolyzer_price=electrolyzer_price,
+                )
+        cost_optimal = self.electrolyzer.hydrogen_cost_lifecycle_USD(
+                    current=OperatingCondition.Optimal.current,
+                    lye_temperature=OperatingCondition.Optimal.lye_temperature,
+                    ambient_temperature=ambient_temperature,
+                    lye_flow=lye_flow,
+                    cooling_efficiency=cooling_efficiency,
+                    heating_efficiency=heating_efficiency,
+                    electricity_price=electricity_price,
+                    electrolyzer_price=electrolyzer_price,
+                )
+        self.plot_contour_map_with_2_points(
+            matrix=cost_matrix,
+            x_range=np.array(current_range) / self.electrolyzer.active_surface_area,
+            y_range=lye_temperature_range,
+            value_default=cost_default,
+            value_optimal=cost_optimal,
+            unit=' $/kg',
+            value_max=5.6,
+            value_min=4.4
+        )
+    
+    def plot_3(self):
+        # 两个工况点在不同碱液流量下的成本，最好也能包含不同的价格
+        lye_flow_range = np.arange(
+            OperatingRange.Cooling.Lye_flow.left,
+            OperatingRange.Cooling.Lye_flow.right,
+            OperatingRange.Cooling.Lye_flow.step/3
+        )
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        electricity_price = LifeCycle.electricity_price
+        electrolyzer_price_list = [150000,250000,350000]
+        cooling_efficiency = LifeCycle.cooling_efficiency
+        heating_efficiency = LifeCycle.heating_efficiency
+        color_idx = 0
+        for electrolyzer_price in electrolyzer_price_list:
+            cost_list_optimal = []
+            cost_list_rated = []
+            for lye_flow in lye_flow_range:
+                cost_cur_optimal = self.electrolyzer.hydrogen_cost_lifecycle_USD(
+                    current= OperatingCondition.Optimal.current,
+                    lye_temperature=OperatingCondition.Optimal.lye_temperature,
+                    lye_flow=lye_flow,
+                    ambient_temperature=ambient_temperature,
+                    electricity_price=electricity_price,
+                    electrolyzer_price=electrolyzer_price,
+                    cooling_efficiency=cooling_efficiency,
+                    heating_efficiency=heating_efficiency,
+                )
+                cost_cur_rated = self.electrolyzer.hydrogen_cost_lifecycle_USD(
+                    current= OperatingCondition.Default.current,
+                    lye_temperature=OperatingCondition.Default.lye_temperature,
+                    lye_flow=lye_flow,
+                    ambient_temperature=ambient_temperature,
+                    electricity_price=electricity_price,
+                    electrolyzer_price=electrolyzer_price,
+                    cooling_efficiency=cooling_efficiency,
+                    heating_efficiency=heating_efficiency,
+                )
+                cost_list_optimal.append(cost_cur_optimal)
+                cost_list_rated.append(cost_cur_rated)
+            plt.plot(
+                lye_flow_range,
+                cost_list_optimal,
+                label = 'Optimal condition, price = ${}'.format(
+                    np.round(
+                        electrolyzer_price*LifeCycle.RMB_2_USD,
+                        1
+                    )
+                ),
+                marker = '.',
+                color = self.color_list[color_idx]
+            )
+            plt.plot(
+                lye_flow_range,
+                cost_list_rated,
+                label = 'Rated condition, price = ${}'.format(
+                    np.round(
+                        electrolyzer_price*LifeCycle.RMB_2_USD,
+                        1
+                    )
+                ),
+                marker = 'x',
+                color = self.color_list[color_idx]
+            )
+            color_idx += 1
+        plt.xlabel(
+            r'$Lye\ flow (m^3/h)$',
+        )
+        plt.ylabel(
+            r'$Hydrogen\ production\ cost\ (\$/kg)$'
+        )
+        # plt.ylim([4.2,5.8])
+        plt.legend(
+            title = 'Operating condition'
+        )
+        plt.ylim([4.4,5.6])
+
+    def plot_4_archived(self):
+        # 两个工况点在不同电解槽价格下的氢气价格
+        # 暂时不再进行此计算
+        electrolyzer_price_range = range(
+            LifeCycle.ElectrolyzerPriceRange.left,
+            LifeCycle.ElectrolyzerPriceRange.right,
+            LifeCycle.ElectrolyzerPriceRange.step
+        )
+        lye_flow_list = [0.8,1.2,1.6]
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        electricity_price = LifeCycle.electricity_price
+        cooling_efficiency = LifeCycle.cooling_efficiency
+        heating_efficiency = LifeCycle.heating_efficiency
+        color_idx = 0
+        for lye_flow in lye_flow_list:
+            
+            cost_list_optimal = []
+            cost_list_rated = []
+            for electrolyzer_price in electrolyzer_price_range:
+                cost_cur_optimal = self.electrolyzer.hydrogen_cost_lifecycle_USD(
+                    current= OperatingCondition.Optimal.current,
+                    lye_temperature=OperatingCondition.Optimal.lye_temperature,
+                    lye_flow=lye_flow,
+                    ambient_temperature=ambient_temperature,
+                    electricity_price=electricity_price,
+                    electrolyzer_price=electrolyzer_price,
+                    cooling_efficiency=cooling_efficiency,
+                    heating_efficiency=heating_efficiency,
+                )
+                cost_cur_rated = self.electrolyzer.hydrogen_cost_lifecycle_USD(
+                    current= OperatingCondition.Default.current,
+                    lye_temperature=OperatingCondition.Default.lye_temperature,
+                    lye_flow=lye_flow,
+                    ambient_temperature=ambient_temperature,
+                    electricity_price=electricity_price,
+                    electrolyzer_price=electrolyzer_price,
+                    cooling_efficiency=cooling_efficiency,
+                    heating_efficiency=heating_efficiency,
+                )
+                cost_list_optimal.append(cost_cur_optimal)
+                cost_list_rated.append(cost_cur_rated)
+            plt.plot(
+                np.array(electrolyzer_price_range)*LifeCycle.RMB_2_USD,
+                cost_list_optimal,
+                label = 'Optimal condition, lye flow = {}'.format(lye_flow),
+                marker = '.',
+                color = self.color_list[color_idx]
+            )
+            if not lye_flow == 1.6:
+                plt.plot(
+                    np.array(electrolyzer_price_range)*LifeCycle.RMB_2_USD,
+                    cost_list_rated,
+                    label = 'Rated condition, lye flow = {}'.format(lye_flow),
+                    marker = 'x',
+                color = self.color_list[color_idx]
+                )
+            color_idx += 1
+        plt.xlabel(
+            'Electrolyzer price ($)',
+        )
+        plt.ylabel(
+            r'$Hydrogen\ production\ cost\ (\$/kg)$'
+        )
+        plt.ylim([4.3,5.9])
+        plt.legend(
+            title = 'Operating condition'
+        )
+    
+    def plot_4(self):
+        # 不同电价与电流下，电解槽的最低制氢成本点变化
+        electricity_price_range = np.arange(0.4,1.5,0.2)
+        current_range = range(
+            OperatingRange.Contour.Current.left,
+            OperatingRange.Contour.Current.right,
+            OperatingRange.Contour.Current.step
+        )
+        lye_temperature = 60
+        lye_flow = OperatingCondition.Default.lye_flow
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        electricity_price = LifeCycle.electricity_price
+        cooling_efficiency = LifeCycle.cooling_efficiency
+        heating_efficiency = LifeCycle.heating_efficiency
+        electrolyzer_price = 250000
+        for electricity_price in electricity_price_range:
+            cost_list = []
+            for current in current_range:
+                cost_cur = self.electrolyzer.hydrogen_cost_lifecycle_USD(
+                    current= current,
+                    lye_temperature=lye_temperature,
+                    lye_flow=lye_flow,
+                    ambient_temperature=ambient_temperature,
+                    electricity_price=electricity_price,
+                    electrolyzer_price=electrolyzer_price,
+                    cooling_efficiency=cooling_efficiency,
+                    heating_efficiency=heating_efficiency,
+                )
+                cost_list.append(cost_cur)
+            plt.plot(
+                np.array(current_range) / self.electrolyzer.active_surface_area,
+                cost_list,
+                label = np.round(electricity_price*LifeCycle.RMB_2_USD,2)
+            )
+        plt.xlabel(
+            r'$Current\ density (A/m^2)$'
+        )
+        plt.ylabel(
+            r'$Hydrogen\ production\ cost\ (\$/kg)$'
+        )
+        plt.ylim([0,20])
+        plt.legend(
+            title = 'Electricity price ($/kWh)'
+        )
+
+    def plot_5(self):
+        # 不同碱液温度与电流下，电解槽的最低制氢成本点变化
+        lye_temperature_list = [40,50,60,70,80]
+        current_range = range(
+            OperatingRange.Contour.Current.left,
+            OperatingRange.Contour.Current.right,
+            OperatingRange.Contour.Current.step
+        )
+        
+        lye_flow = OperatingCondition.Default.lye_flow
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        electricity_price = LifeCycle.electricity_price
+        cooling_efficiency = LifeCycle.cooling_efficiency
+        heating_efficiency = LifeCycle.heating_efficiency
+        electrolyzer_price = 250000
+        for lye_temperature in lye_temperature_list:
+            cost_list = []
+            for current in current_range:
+                cost_cur = self.electrolyzer.hydrogen_cost_lifecycle_USD(
+                    current= current,
+                    lye_temperature=lye_temperature,
+                    lye_flow=lye_flow,
+                    ambient_temperature=ambient_temperature,
+                    electricity_price=electricity_price,
+                    electrolyzer_price=electrolyzer_price,
+                    cooling_efficiency=cooling_efficiency,
+                    heating_efficiency=heating_efficiency,
+                )
+                cost_list.append(cost_cur)
+            plt.plot(
+                np.array(current_range) / self.electrolyzer.active_surface_area,
+                cost_list,
+                label = np.round(lye_temperature,0)
+            )
+        plt.xlabel(
+            r'$Current\ density (A/m^2)$'
+        )
+        plt.ylabel(
+            r'$Hydrogen\ production\ cost\ (\$/kg)$'
+        )
+        plt.ylim([4.4,6.4])
+        plt.legend(
+            title = r'$Lye\ temperature\ (^\circ C)$'
+        )
+
+    def plot_6(self):
+        electricity_price_range = np.arange(0.4,1.5,0.2)
+        current_range = range(
+            OperatingRange.Contour.Current.left,
+            OperatingRange.Contour.Current.right,
+            OperatingRange.Contour.Current.step
+        )
+        lye_temperature = 60
+        lye_flow = OperatingCondition.Default.lye_flow
+        ambient_temperature = OperatingCondition.Default.ambient_temperature
+        electricity_price = LifeCycle.electricity_price
+        cooling_efficiency = LifeCycle.cooling_efficiency
+        heating_efficiency = LifeCycle.heating_efficiency
+        electrolyzer_price = 250000
+        electricity_price=0.4
+        # for electricity_price in electricity_price_range:
+        cost_list = []
+        for current in current_range:
+            cost_cur = self.electrolyzer.hydrogen_cost_lifecycle_detail_USD(
+                current= current,
+                lye_temperature=lye_temperature,
+                lye_flow=lye_flow,
+                ambient_temperature=ambient_temperature,
+                electricity_price=electricity_price,
+                electrolyzer_price=electrolyzer_price,
+                cooling_efficiency=cooling_efficiency,
+                heating_efficiency=heating_efficiency,
+            )
+            cost_list.append(cost_cur)
+            if current == OperatingCondition.Default.current:
+                cost_default = cost_cur
+            if current == OperatingCondition.Optimal.current:
+                cost_optimal = cost_cur
+        cost_matrix = np.array(cost_list).T
+        
+        plt.stackplot(
+            np.array(current_range) / self.electrolyzer.active_surface_area,
+            cost_matrix,
+            labels = (
+                'Electrolyzer purchase',
+                'Electrolysis cost',
+                'Cooling and heating cost',
+                'Additional cost',
+            ),
+            baseline='zero'
+        )
+        plt.xlabel(
+            r'$Current\ density (A/m^2)$'
+        )
+        plt.ylabel(
+            r'$Hydrogen\ production\ cost\ (\$/kg)$'
+        )
+        plt.ylim([0,6])
+        plt.legend(
+            title = 'Cost break down ($/kWh)'
+        )
