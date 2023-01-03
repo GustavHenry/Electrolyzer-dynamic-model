@@ -876,10 +876,17 @@ class Electrolyzer:
             current=current,
             voltage=voltage
         )
-        if cooling_power>0:
-            return (power, cooling_power * cooling_efficiency)
-        else:
-            return (power, abs(cooling_power) * heating_efficiency)
+        cooling_power_actual = self.cooling_power_actual(
+            temperature=temperature,
+            lye_flow=lye_flow,
+            lye_temperature=lye_temperature,
+            cooling_efficiency=cooling_efficiency,
+            heating_efficiency=heating_efficiency
+        )
+        return (
+            power,cooling_power_actual
+        )
+
 
     def electricity_cost_lifecycle_detail(
         self,
