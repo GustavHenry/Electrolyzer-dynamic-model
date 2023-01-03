@@ -494,8 +494,8 @@ class Electrolyzer:
         temperature,
         lye_temperature,
         lye_flow,
-        cooling_efficiency,
-        heating_efficiency,
+        cooling_efficiency = LifeCycle.cooling_efficiency,
+        heating_efficiency = LifeCycle.heating_efficiency
     ):
         cooling_power_requirement = self.cooling_power_requirement(
             temperature=temperature,
@@ -897,7 +897,6 @@ class Electrolyzer:
         electricity_price,
         cooling_efficiency = LifeCycle.cooling_efficiency,
         heating_efficiency = LifeCycle.heating_efficiency
-        
     ):
         (electrolysis_power,cooling_power) = self.power_detail(
             current=current,
