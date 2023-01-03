@@ -488,6 +488,25 @@ class Electrolyzer:
         return (
             temperature - lye_temperature
         ) * lye_flow * self.heat_capacity_lye_flow
+    
+    def cooling_power_actual(
+        self,
+        temperature,
+        lye_temperature,
+        lye_flow,
+        cooling_efficiency,
+        heating_efficiency,
+    ):
+        cooling_power_requirement = self.cooling_power_requirement(
+            temperature=temperature,
+            lye_temperature=lye_temperature,
+            lye_flow=lye_flow
+        )
+        if cooling_power_requirement>0:
+            cooling_power_actual = cooling_power_requirement * cooling_efficiency
+        else:
+            cooling_power_actual = abs(cooling_power_requirement) * heating_efficiency
+        return cooling_power_actual
 
     def power_total(
         self,
@@ -529,11 +548,14 @@ class Electrolyzer:
             current=current,
             voltage=voltage
         )
-        if cooling_power>0:
-            cost = power + cooling_power * cooling_efficiency
-        else:
-            cost = power + abs(cooling_power) * heating_efficiency
-        return cost
+        cooling_power_actual = self.cooling_power_actual(
+            temperature=temperature,
+            lye_flow=lye_flow,
+            lye_temperature=lye_temperature,
+            cooling_efficiency=cooling_efficiency,
+            heating_efficiency=heating_efficiency
+        )
+        return power + cooling_power_actual
 
     def power_total_current_density(
         self,
