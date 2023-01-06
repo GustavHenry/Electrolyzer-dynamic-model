@@ -19,6 +19,7 @@ class DataDir:
     Raw_electrolyzer = "../data/raw/Electrolyzer"
     Raw_thermal_model = "../data/raw/ThermalModel"
     Int_thermal_model = "../data/interim/ThermalModel"
+    Model_thermal_model = '../models/thermal_model'
 
 
 class Files:

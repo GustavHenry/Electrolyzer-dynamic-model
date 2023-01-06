@@ -193,6 +193,34 @@ class Plotter(ABC):
         plt.show()
 
 
+class DualPlotter(Plotter):
+    def __init__(
+        self, 
+        label="",
+        title="", 
+        num_subplot=2, 
+        title_plot=False
+    ) -> None:
+        super().__init__(label, title, num_subplot, title_plot)
+
+    @abstractmethod
+    def plot_1(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def plot_2(self):
+        raise NotImplementedError
+
+    
+    def plot(self):
+        plt.subplots_adjust(
+            left=0.05, bottom=0.1, right=0.95, top=0.9, wspace=0.2, hspace=0.15
+        )
+        plt.subplot(1,2,1)
+        self.plot_1()
+        plt.subplot(1,2,2)  
+        self.plot_2()
+
 class QuadroPlotter(Plotter):
     def __init__(
         self, 

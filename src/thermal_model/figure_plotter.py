@@ -210,6 +210,108 @@ class Thermal_model_regression_cumulative_error_plot(Plotter):
         )
         plt.legend(['regression target','regression prediction'])
 
+
+class Data_model_regression(DualPlotter):
+    def __init__(
+        self, 
+        label="Thermal model", 
+        title="原始数据与模型拟合结果对比", 
+        num_subplot=2, 
+        title_plot=False
+    ) -> None:
+        # 大致包含：
+        # Thermal_model_regression_scatter().save()
+        # Thermal_model_regression_error_histplot().save()
+        # Model_polarization_different_lye_temperature().save()
+        # Model_faraday_efficiency_different_lye_temperature().save()
+        super().__init__(label, title, num_subplot, title_plot)
+        self.electrolyzer = Electrolyzer()
+
+    def plot_1(self):
+        df_thermal_model_data_raw = ThermalModelData().load()
+        df_thermal_model_data_input = generate_model_input(df_thermal_model_data_raw)
+
+        model_random_forest,model_input,model_target,score = fit_random_forest(
+            df_thermal_model_data_input,
+            4
+        )
+        ( model_predict, error) = model_estimator(
+            model_random_forest,model_input,model_target
+        )
+        self.model_target = np.array(model_target)
+        self.model_predict = np.array(model_predict)
+        self.error = np.array(error)
+        plt.scatter(
+            self.model_target[:1],
+            self.model_predict[:1],
+            label = 'Target vs. prediction',
+            # marker = 'x',
+            # alpha=0.05
+            color = self.color_list[0]
+        )
+        plt.scatter(
+            self.model_target,
+            self.model_predict,
+            # label = 'Target vs. prediction',
+            # marker = 'x',
+            alpha=0.05,
+            color = self.color_list[0]
+        )
+        minimum = min(self.model_target)
+        maximum = max(self.model_predict)
+        plt.plot(
+            [-1,1],
+            [-1,1],
+            'r'
+        )
+        plt.xlim([-1,1])
+        plt.ylim([-1,1])
+        plt.xlabel('Standardized target')
+        plt.ylabel('Model prediction')
+        plt.legend(['Target vs. prediction'])
+    
+    def plot_2(self):
+        df_thermal_model_data_raw = ThermalModelData().load()
+        df_thermal_model_data_input = generate_model_input(df_thermal_model_data_raw)
+
+        model_random_forest,model_input,model_target,score = fit_random_forest(
+            df_thermal_model_data_input,
+            5
+        )
+
+        ( model_predict, error) = model_estimator(
+            model_random_forest,model_input,model_target
+        )
+        self.model_target = model_target
+        self.model_predict = model_predict
+        start = 18000
+        end = 24200
+        offset = 18
+        x_range = np.array(range(0,end-start))*20
+        plt.plot(
+            x_range,
+            np.cumsum(
+                self.model_target[start:end]
+            ) +offset
+        )
+        plt.plot(
+            x_range,
+            np.cumsum(
+                self.model_predict[start:end]
+            ) + offset
+        )
+        plt.legend(['regression target','regression prediction'])
+        plt.xlabel('Time (s)')
+        plt.ylabel(r'$Operating\ temperature (^\circ C)$')
+        plt.ylim([0,100])
+        Loader.save_model(
+            model = model_random_forest,
+            file_name='Random_forest',
+            score=score
+        )
+        # plt.xticks(np.array(range(0,end-start))*20)
+
+
 class Model_polarization_different_lye_temperature(Plotter):
     def __init__(
         self, 
@@ -283,6 +385,79 @@ class Model_faraday_efficiency_different_lye_temperature(Plotter):
             )
         plt.xlabel(r'$Current\ density\ (A/m^2)$')
         plt.ylabel('Electrolyzer stack voltage')
+        plt.legend(
+            title = 'Outlet temperature'
+        )
+
+
+class Model_polarization_faraday(DualPlotter):
+    def __init__(
+        self, 
+        label="Thermal model", 
+        title="不同温度下电解槽极化与法拉第效率", 
+        num_subplot=2, 
+        title_plot=False
+    ) -> None:
+        # 大致包含：
+        # Thermal_model_regression_scatter().save()
+        # Thermal_model_regression_error_histplot().save()
+        # Model_polarization_different_lye_temperature().save()
+        # Model_faraday_efficiency_different_lye_temperature().save()
+        super().__init__(label, title, num_subplot, title_plot)
+        self.electrolyzer = Electrolyzer()
+
+    def plot_1(self):
+        lye_temperature_list = range(35,95,10)
+        for lye_temperature in lye_temperature_list:
+            (
+                current_list,
+                voltage_list,
+                power_list,
+                temperature_list
+            ) = self.electrolyzer.get_polarization(
+                lye_flow=self.electrolyzer.default_lye_flow,
+                lye_temperature=lye_temperature,
+                current_max=2000,
+                ambient_temperature=15,
+            )
+
+            plt.plot(
+                np.array(current_list) / self.electrolyzer.active_surface_area,
+                np.array(voltage_list) / self.electrolyzer.num_cells,
+                label = r'${} ^\circ C$'.format(
+                    lye_temperature
+                )
+            )
+        plt.xlabel(r'$Current\ density\ (A/m^2)$')
+        plt.ylabel('Electrolysis voltage (V)')
+        plt.legend(
+            title = 'Lye inlet temperature'
+        )
+        # plt.ylim([1.2,2.4])
+
+    def plot_2(self):
+        temperature_list = range(35,107,20) # 只考虑不同出口温度下的法拉第效率
+        current_max = 2000
+
+        for temperature in temperature_list:
+            current_list = range(0,current_max,current_max//100)
+            faraday_efficiency_list = []
+            for current in current_list:
+                faraday_efficiency_cur = self.electrolyzer.faraday_efficiency_current(
+                    current=current,
+                    temperature=temperature
+                )
+                faraday_efficiency_list.append(faraday_efficiency_cur)
+            plt.plot(
+                np.array(current_list)/self.electrolyzer.active_surface_area,
+                faraday_efficiency_list,
+                label = r'${} ^\circ C$'.format(
+                    temperature
+                )
+            )
+        plt.ylim([0,1])
+        plt.xlabel(r'$Current\ density\ (A/m^2)$')
+        plt.ylabel('Faraday efficiency')
         plt.legend(
             title = 'Outlet temperature'
         )
@@ -796,6 +971,8 @@ class Model_output_input_temperature_delta(QuadroPlotter):
         ax2.set_ylim([60,70])
         ax2.set_yticks(range(60,71))
         ax1.set_ylim([10,60])
+
+
 class Model_cooling_power_requirement(QuadroPlotter):
     def __init__(
         self, 

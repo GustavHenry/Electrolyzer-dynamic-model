@@ -43,7 +43,7 @@ def fit_random_forest(
     print('---Model score of random forest with {} estimator is: {}'.format(
         n_estimators,score
     ))
-    return model,model_input,model_target
+    return model,model_input,model_target,score
 
 def fit_LARS(
     df_thermal_model_data_input,
