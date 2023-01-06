@@ -925,6 +925,8 @@ def current_TlyeIn_liftcycle_cost():
             FE, cd = ele.Farady(current=ii, Temp=T_eq)
             Q_H2 = (ii / 2 / 96485) * (22.4 / 1000) * ele.n_cell * FE * 3600
             Q_H2 *= Years * Hours * Open * 0.089
+            if ii==620 and tlye == 59:
+                print((Cost_energy + Price) / Q_H2 * (1 + Earning),ii,tlye)
             res_mat[j, i] = (Cost_energy + Price) / Q_H2 * (1 + Earning)
     plt.figure(figsize=(10, 6))
     plt.subplots_adjust(left=0.06, bottom=0.09, right=1, top=0.967)
@@ -946,7 +948,7 @@ def current_TlyeIn_liftcycle_cost():
     plt.colorbar(CS)
     plt.xlabel(r"$current \ density \ (A/m^2)$", fontsize=fonts)
     plt.ylabel(r"$Electrolyzer \ inlet \ temperature \ (^\circ C)$", fontsize=fonts)
-    plt.clabel(CS, colors="w", fmt="%1.2f", manual=True, fontsize=fonts)
+    plt.clabel(CS, colors="w", fmt="%1.2f", manual=False, fontsize=fonts)
     print("the consumed time is", time.time() - t0)
     print(
         "the consumed time per point is",

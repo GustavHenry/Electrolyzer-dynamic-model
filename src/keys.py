@@ -19,6 +19,7 @@ class DataDir:
     Raw_electrolyzer = "../data/raw/Electrolyzer"
     Raw_thermal_model = "../data/raw/ThermalModel"
     Int_thermal_model = "../data/interim/ThermalModel"
+    Model_thermal_model = '../models/thermal_model'
 
 
 class Files:
@@ -37,11 +38,14 @@ class LoaderType:
 
 class Cache:
     """储存一些文件的中间缓存，用于统一缓存的读取与识别"""
-    thermal_model_data_1101 = "thermal_model_data_1101"  # 重写刚开始时，简单讲所有数据拼接在一起
+    thermal_model_data_1101 = "thermal_model_data_1101" # 重写刚开始时，简单讲所有数据拼接在一起
+    thermal_model_data_0102 = "thermal_modal_data_0102" # 抽选出适合作为热模型数据的准静态输入部分，并进行拼接
 
 
 class Constants:
+    seconds_in_hour = 3600
     seconds_in_day = 24 * 3600  # 每日中的秒数
+    hours_in_year = 365*24 # 每日年中小时数
     num_cells = 34  # 电解槽片数
     active_area = 0.425  # 电解槽活性面积
     absolute_temp_delta = 273.15  # 绝对零度到零摄氏度的差值
@@ -57,6 +61,9 @@ class Constants:
         2.2625  # kJ/(kg*K), the specific heat capacity of the alkaline
     )
 
+    R = 96485 # 理想气体常数
+    std_volume = 22.4 # mol/L
+    weight_hydrogen = 2 # g/mol
 
 class PolarizationLihao:
     r1 = 0.0001362

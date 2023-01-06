@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
 import pandas as pd
 import os
-from keys import CACHE_DIR, COMPRESSION, LoaderType
+from keys import CACHE_DIR, COMPRESSION, LoaderType, DataDir
 import pickle
-
+from datetime import date
+import numpy as np
 
 class Loader(ABC):
     def __init__(
@@ -47,3 +48,43 @@ class Loader(ABC):
                 self.cache()
 
         return self.data
+    
+    @staticmethod
+    def save_model(
+        model,
+        file_name,
+        score,
+        date = date.today(),
+        folder = DataDir.Model_thermal_model,
+    ):
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+        file_path = os.path.join(
+            folder,
+            '_'.join([
+                file_name,str(np.round(score,2)),date.strftime('%Y%m%d')
+            ])
+        )
+        with open(file_path,'wb') as f:
+            pickle.dump(
+                model,
+                f,
+                protocol=4
+            )
+        print('Model saved to ' + file_path)
+    
+    @staticmethod
+    def load_model(
+        file_name,
+        folder = DataDir.Model_thermal_model,
+    ):
+        file_path = os.path.join(
+            folder,file_name
+        )
+        if os.path.exists(file_path):
+            with open(file_path,'rb') as f:
+                model = pickle.load(f)
+            return model
+        else:
+            raise FileNotFoundError
+
