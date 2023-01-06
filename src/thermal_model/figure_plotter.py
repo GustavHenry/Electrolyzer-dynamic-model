@@ -727,7 +727,7 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
                 temperature=temperature_cur
             )
             temperature_list.append(temperature_cur)
-            voltage_list.append(voltage_cur)
+            voltage_list.append(voltage_cur/self.electrolyzer.num_cells)
         
         ax1,ax2 = self.plot_double_y_axis(
             x = lye_flow_range,
@@ -735,9 +735,9 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
             y2 = voltage_list,
             x_title = r'$Lye\ flow (m^3/h)$',
             y1_title= r'$Outlet\ temperature (^\circ C)$',
-            y2_title='Stack voltage (V)',
+            y2_title='Cell voltage (V)',
         )
-        ax2.set_ylim([60,65])
+        ax2.set_ylim([1.2,2.2])
         # ax2.set_yticks(range(66,71))
         ax1.set_ylim([55,70])
 
@@ -766,7 +766,7 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
                 temperature=temperature_cur
             )
             temperature_list.append(temperature_cur)
-            voltage_list.append(voltage_cur)
+            voltage_list.append(voltage_cur/self.electrolyzer.num_cells)
         
         ax1,ax2 = self.plot_double_y_axis(
             x = lye_flow_range,
@@ -774,10 +774,10 @@ class Model_output_temperature_different_lye_temperature(QuadroPlotter):
             y2 = voltage_list,
             x_title = r'$Lye\ flow (m^3/h)$',
             y1_title= r'$Outlet\ temperature (^\circ C)$',
-            y2_title='Stack voltage (V)',
+            y2_title='Cell voltage (V)',
         )
-        ax2.set_ylim([60,70])
-        ax2.set_yticks(range(60,71))
+        ax2.set_ylim([1.2,2.2])
+        # ax2.set_yticks(range(60,71))
         ax1.set_ylim([70,120])
         
 
