@@ -1570,7 +1570,7 @@ class Model_life_cycle_hydrogen_cost(HexaPlotter):
             y_range=lye_temperature_range,
             value_default=cost_default,
             value_optimal=cost_optimal,
-            unit=' $USD/kg',
+            unit=' $/kg',
             value_max=5.6,
             value_min=4.4
         )
