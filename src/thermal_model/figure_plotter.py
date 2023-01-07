@@ -1249,15 +1249,14 @@ class Model_cooling_power_requirement(QuadroPlotter):
         ax1.set_ylim([0,60])
         ax2.set_ylim([-25,30])
         ax1.legend(
-            title ='Power,\n Cooling efficiency=',
+            title ='Power,\n Cooling rate=',
             loc = 'lower left'
         )
         ax2.legend(
-            title = 'Ratio,\n Cooling efficiency=',
+            title = 'Ratio,\n Cooling rate=',
             loc = 'upper right'
         )
         plt.grid(visible=False)
-
 
 class Model_efficiency_hydrogen_cost(QuadroPlotter):
     def __init__(
@@ -1434,53 +1433,63 @@ class Model_efficiency_hydrogen_cost(QuadroPlotter):
 
     def plot_4(self):
         # 额定工作点和最优工作点的效率情况
+        cooling_efficiency_list = [0.15,0.25,0.35,0.45,0.55]
         lye_flow_range = np.arange(
             OperatingRange.Cooling.Lye_flow.left,
             OperatingRange.Cooling.Lye_flow.right,
             OperatingRange.Cooling.Lye_flow.step/3
         )
         ambient_temperature = OperatingCondition.Default.ambient_temperature
-        cost_list_optimal = []
-        cost_list_rated = []
+        color_idx = 0
+        for cooling_efficiency in cooling_efficiency_list:
+            cost_list_optimal = []
+            cost_list_rated = []
 
-        for lye_flow in lye_flow_range:
-            current = OperatingCondition.Optimal.current
-            lye_temperature = OperatingCondition.Optimal.lye_temperature
-            cost_cur_optimal = self.electrolyzer.hydrogen_cost_current(
-                current=current,
-                ambient_temperature=ambient_temperature,
-                lye_flow=lye_flow,
-                lye_temperature=lye_temperature
+            for lye_flow in lye_flow_range:
+                current = OperatingCondition.Optimal.current
+                lye_temperature = OperatingCondition.Optimal.lye_temperature
+                cost_cur_optimal = self.electrolyzer.hydrogen_cost_current(
+                    current=current,
+                    ambient_temperature=ambient_temperature,
+                    lye_flow=lye_flow,
+                    lye_temperature=lye_temperature,
+                    cooling_efficiency=cooling_efficiency,
+                )
+                current = OperatingCondition.Rated.current
+                lye_temperature = OperatingCondition.Rated.lye_temperature
+                cost_cur_rated = self.electrolyzer.hydrogen_cost_current(
+                    current=current,
+                    ambient_temperature=ambient_temperature,
+                    lye_flow=lye_flow,
+                    lye_temperature=lye_temperature,
+                    cooling_efficiency=cooling_efficiency,
+                )
+                cost_list_optimal.append(cost_cur_optimal)
+                cost_list_rated.append(cost_cur_rated)
+            plt.plot(
+                lye_flow_range,
+                cost_list_optimal,
+                label = 'Optimal, cooling rate = '+str(cooling_efficiency),
+                marker = '.',
+                color = self.color_list[color_idx]
             )
-            current = OperatingCondition.Rated.current
-            lye_temperature = OperatingCondition.Rated.lye_temperature
-            cost_cur_rated = self.electrolyzer.hydrogen_cost_current(
-                current=current,
-                ambient_temperature=ambient_temperature,
-                lye_flow=lye_flow,
-                lye_temperature=lye_temperature
+            plt.plot(
+                lye_flow_range,
+                cost_list_rated,
+                label = 'Rated, cooling rate = '+str(cooling_efficiency),
+                marker = 'x',
+                color = self.color_list[color_idx]
             )
-            cost_list_optimal.append(cost_cur_optimal)
-            cost_list_rated.append(cost_cur_rated)
-        plt.plot(
-            lye_flow_range,
-            cost_list_optimal,
-            label = 'Optimal condition'
-        )
-        plt.plot(
-            lye_flow_range,
-            cost_list_rated,
-            label = 'Rated condition'
-        )
+            color_idx += 1
         plt.xlabel(
             r'$Lye\ flow (m^3/h)$',
         )
         plt.ylabel(
             r'$Hydrogen\ production\ cost\ (kWh/Nm^3)$'
         )
-        plt.ylim([4.2,5.8])
+        plt.ylim([4.2,5.6])
         plt.legend(
-            title = 'Operating condition'
+            loc='lower right'
         )
 
 class Model_life_cycle_hydrogen_cost(HexaPlotter):
