@@ -1645,7 +1645,7 @@ class Model_life_cycle_hydrogen_cost(HexaPlotter):
             value_min=4.4
         )
     
-    def plot_3(self):
+    def plot_4(self):
         # 两个工况点在不同碱液流量下的成本，最好也能包含不同的价格
         lye_flow_range = np.arange(
             OperatingRange.Cooling.Lye_flow.left,
@@ -1793,7 +1793,7 @@ class Model_life_cycle_hydrogen_cost(HexaPlotter):
             title = 'Operating condition'
         )
     
-    def plot_4(self):
+    def plot_6(self):
         # 不同电价与电流下，电解槽的最低制氢成本点变化
         electricity_price_range = np.arange(0.4,1.5,0.2)
         current_range = range(
@@ -1883,7 +1883,7 @@ class Model_life_cycle_hydrogen_cost(HexaPlotter):
             title = r'$Lye\ temperature\ (^\circ C)$'
         )
 
-    def plot_6(self):
+    def plot_3(self):
         electricity_price_range = np.arange(0.4,1.5,0.2)
         current_range = range(
             OperatingRange.Contour.Current.left,
