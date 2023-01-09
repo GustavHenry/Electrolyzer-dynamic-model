@@ -213,8 +213,16 @@ class DualPlotter(Plotter):
 
     
     def plot(self):
+        self.figure,axs = plt.subplots(1,2,figsize = self.figsize[self.num_subplot] )
+        for i,ax in enumerate(axs.ravel()):
+            ax.set_title(
+                FIG_SEQUENCE_DICT[i],
+                loc = 'left',
+                pad = 10,
+                fontdict = {'size':18}
+            )        
         plt.subplots_adjust(
-            left=0.05, bottom=0.1, right=0.95, top=0.9, wspace=0.2, hspace=0.15
+            left=0.05, bottom=0.05, right=0.95, top=0.9, wspace=0.15, hspace=0.15
         )
         plt.subplot(1,2,1)
         self.plot_1()
@@ -249,8 +257,16 @@ class QuadroPlotter(Plotter):
         raise NotImplementedError
     
     def plot(self):
+        self.figure,axs = plt.subplots(2,2,figsize = self.figsize[self.num_subplot] )
+        for i,ax in enumerate(axs.ravel()):
+            ax.set_title(
+                FIG_SEQUENCE_DICT[i],
+                loc = 'left',
+                pad = 10,
+                fontdict = {'size':18}
+            )        
         plt.subplots_adjust(
-            left=0.05, bottom=0.1, right=0.95, top=0.9, wspace=0.2, hspace=0.15
+            left=0.05, bottom=0.05, right=0.95, top=0.9, wspace=0.15, hspace=0.15
         )
         plt.subplot(2,2,1)
         self.plot_1()
@@ -298,8 +314,16 @@ class HexaPlotter(Plotter):
         raise NotImplementedError
     
     def plot(self):
+        self.figure,axs = plt.subplots(3,2,figsize = self.figsize[self.num_subplot] )
+        for i,ax in enumerate(axs.ravel()):
+            ax.set_title(
+                FIG_SEQUENCE_DICT[i],
+                loc = 'left',
+                pad = 10,
+                fontdict = {'size':18}
+            )        
         plt.subplots_adjust(
-            left=0.05, bottom=0.1, right=0.95, top=0.9, wspace=0.18, hspace=0.15
+            left=0.05, bottom=0.05, right=0.95, top=0.9, wspace=0.15, hspace=0.15
         )
         plt.subplot(3,2,1)
         self.plot_1()

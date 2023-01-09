@@ -9,6 +9,15 @@ ENCODING = "utf-8-sig"  # csv的编码
 COMPRESSION = "gzip"  # pickle的压缩格式
 
 
+FIG_SEQUENCE_DICT = {
+    0:'(a)',
+    1:'(b)',
+    2:'(c)',
+    3:'(d)',
+    4:'(e)',
+    5:'(f)'
+}
+
 class DataDir:
     """一些常用的数据路径"""
 
